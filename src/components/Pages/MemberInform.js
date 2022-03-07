@@ -108,6 +108,8 @@ class MemberInform extends Component {
             <tr>
               <th scope="col">#</th>
               <th scope="col">cooperation</th>
+              <th scope="col">period</th>
+              <th scope="col">open</th>
               <th scope="col">data</th>
               <th scope="col">result</th>
             </tr>
@@ -118,6 +120,8 @@ class MemberInform extends Component {
                 <tr key={key}>
                   <th scope="row">{coo['ID']}</th>
                   <td>{coo['target']}</td>
+                  <td>{coo['openPeriod']}</td>
+                  <td>{coo['openOrNot']}</td>
                   <td>                    
                     <Link to={{ 
                       pathname: "/MemberCols", 

@@ -8,6 +8,7 @@ import CooperationList from "./components/Pages/CooperationList";
 import JoinCooperation from "./components/Pages/JoinCooperation";
 import CooperationInform from "./components/Pages/CooperationInform";
 import MemberCols from "./components/Pages/MemberCols";
+import ManageCooperation from "./components/Pages/ManageCooperation";
 import history from './History';
 
 export default class Routes extends Component {
@@ -22,6 +23,7 @@ export default class Routes extends Component {
                     <Route path="/JoinCooperation" component={JoinCooperation} />
                     <Route path="/CooperationInform" component={CooperationInform} />
                     <Route path="/MemberCols" component={MemberCols} />
+                    <Route path="/ManageCooperation" component={ManageCooperation} />
                     <Route path="/" exact component={HomePage} />
                 </Switch>
             </BrowserRouter>

@@ -22,11 +22,15 @@ class CreateCooperation extends Component {
         colName:''
       }],
       primaryKey:'',
-      target:''
+      target:'',
+      openingPeriod:'',
+      colNeed:0
     }    
     this.handleCol = this.handleCol.bind(this);
     this.handlePrimaryKey = this.handlePrimaryKey.bind(this);
+    this.handleOpeningPreiod = this.handleOpeningPreiod.bind(this);
     this.handleTarget = this.handleTarget.bind(this);
+    this.handleColNeed = this.handleColNeed.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.show = this.show.bind(this);
   }
@@ -37,6 +41,7 @@ class CreateCooperation extends Component {
     const accounts = await web3.eth.getAccounts();
     this.setState({ account: accounts[0] })
     const pm = await platform.methods.manager().call();
+
     if(this.state.account === pm){
       this.setState({manager:true});
     }
@@ -83,11 +88,20 @@ class CreateCooperation extends Component {
     this.setState({primaryKey:e.target.value});
   }
 
+  //設定開放期間
+  handleOpeningPreiod(e) {
+    this.setState({openingPeriod:e.target.value});
+  }
+
   //設定目標
   handleTarget(e) {
     this.setState({target: e.target.value});
   }
 
+  //設定提案欄位需求數量
+  handleColNeed(e) {
+    this.setState({colNeed:e.target.value});
+  }
   //新增欄位
   addCol(){
     this.setState(prevState=>({
@@ -118,13 +132,24 @@ class CreateCooperation extends Component {
 
     //將成員地址和datasetID綁定
     let memberDatasets = [[this.state.account,parseInt(await platform.methods.datasetCnt().call(),16)]]
-    
+
+    function addDays(date, days) {
+      var result = new Date(date);
+      result.setDate(result.getDate() + days);
+      return result;
+    }    
+    let date = new Date()
+    let endDate = addDays(date,parseInt(this.state.openingPeriod))
+    console.log(endDate)
     //新建合作案資訊的JSON
     let cooperationJson = {
       "ID": parseInt(await platform.methods.cooperationCnt().call(),16),
       "target": this.state.target,
       "host": this.state.account,
-      "memberDataset":memberDatasets
+      "memberDataset":memberDatasets,
+      "openPeriod":endDate,
+      "openOrNot":true,
+      "columnNum":this.setState
     };
 
     //將成員資訊中，餐與合作案的部分新增創建的合作案ID
@@ -152,6 +177,7 @@ class CreateCooperation extends Component {
     let ipfsDataset = await ipfs.add(Buffer.from(datasetJsonObj))
     let ifpsMem = await ipfs.add(Buffer.from(memJsonObj))
     console.log("Submitting file to ipfs...")
+
     //將區塊鏈上的IPFS hash更新
     platform.methods.createCooperation(ipfsCooperation['path']).send({ from: this.state.account }).then((r) => {
       return this.setState({ cooperationHash: ipfsCooperation['path'] })
@@ -162,14 +188,19 @@ class CreateCooperation extends Component {
 
   //console顯示設定欄位，用來Debug
   async show(){
-    let columns = this.state.columns
-    for( let i = 0 ;i<columns.length;i++){
-      console.log(columns[i]['name'])
-    }
-    if(await platform.methods.members(this.state.account).call()){
-      let memHash =await platform.methods.memberHash(this.state.account).call()
-      await this.getMemJson(memHash)
-    }
+    const amount = '2'; // Willing to send 2 ethers
+    const amountToSend = web3.utils.toWei(amount);
+    await platform.methods.addCooperationWithEth().send({ from: this.state.account,value: amountToSend})
+    // function addDays(date, days) {
+    //   var result = new Date(date);
+    //   result.setDate(result.getDate() + days);
+    //   return result;
+    // }    
+    // let date = new Date()
+    // let endDate = addDays(date,parseInt(this.state.openingPeriod))
+    // console.log(endDate)
+    // if(date>endDate) console.log('a')
+
   }
 
   //顯示輸入框和對應function
@@ -191,7 +222,13 @@ class CreateCooperation extends Component {
                <input type="text" placeholder="primary Key" style={styleInput} onChange={ this.handlePrimaryKey } />
               </label>
               <br/>
+              <label>
+               <input type="text" placeholder="opening period (day)" style={styleInput} onChange={ this.handleOpeningPreiod } />
+              </label>
               <br/>
+              <label>
+               <input type="text" placeholder="column need" style={styleInput} onChange={ this.handleColNeed } />
+              </label>
           </div>    
           <div>
             <h2> Set Column </h2>  

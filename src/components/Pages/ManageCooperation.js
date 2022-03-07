@@ -5,7 +5,7 @@ import platform from '../Load/platform.js'
 import history from '../../History';
 import { Link } from 'react-router-dom';
 //********合作案清單的介面***********
-class CooperationList extends Component {
+class ManageCooperation extends Component {
   
   //account 使用者的地址
   //cooperations 合作案的list
@@ -172,4 +172,4 @@ class CooperationList extends Component {
 }
 
 
-export default CooperationList;
+export default ManageCooperation;

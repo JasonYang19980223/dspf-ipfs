@@ -12,10 +12,13 @@ contract DSPF {
   constructor(){
       manager = msg.sender;
   }
+
+  //驗證是否為成員
   modifier memberOnly{
       require(members[msg.sender]==true);
       _;
   }
+
   //計算資料申請的總數，當作資料要求的ID
   uint public datasetCnt =0;
   
@@ -67,4 +70,7 @@ contract DSPF {
   function getDataset(uint _datasetID) public view returns (string memory) {
     return datasetHash[_datasetID];
   }
+
+  //透過加密貨幣參與提案
+  function addCooperationWithEth() public payable memberOnly{}
 }

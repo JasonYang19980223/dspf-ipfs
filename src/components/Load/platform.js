@@ -3,7 +3,7 @@ import Platform from '../../abis/DSPF.json';
 
 const platform =new Web3.eth.Contract(
     Platform.abi,
-    '0x6C78047c6C7166d7296D180eA53075E84792281b'
+    '0x4a52bD4df5576B1ff59Ed0730423077117D09DB2'
 );
 
 export default platform;

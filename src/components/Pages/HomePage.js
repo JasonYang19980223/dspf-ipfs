@@ -21,6 +21,7 @@ class HomePage extends Component {
     this.setState({ account: accounts[0] })
     const pm = await platform.methods.manager().call();
     if(this.state.account === pm){
+      console.log('hi')
       this.setState({manager:true});
     }
     else
