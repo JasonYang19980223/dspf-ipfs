@@ -55,7 +55,6 @@ class Create extends Component {
   handleEmail(e) {
     this.setState({email: e.target.value});
   }
-
   //將成員資訊上傳IPFS
   async handleClick(e) {
     let orgJson = {
@@ -95,7 +94,7 @@ class Create extends Component {
     };
     return (
       <div>
-        <Nbar account={this.state.account} manager={this.state.manager}memJson={this.state.memJson}/>
+        <Nbar account={this.state.account} manager={this.state.manager}memJson={this.state.memJson}/> 
         <form style={{margin:'5px'}}>
           <label>
             <input type="text" placeholder="orginization name" style={styleInput} onChange={ this.handleName } />

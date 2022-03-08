@@ -109,7 +109,7 @@ class MemberInform extends Component {
               <th scope="col">#</th>
               <th scope="col">cooperation</th>
               <th scope="col">period</th>
-              <th scope="col">open</th>
+              <th scope="col">upload</th>
               <th scope="col">data</th>
               <th scope="col">result</th>
             </tr>
@@ -121,7 +121,12 @@ class MemberInform extends Component {
                   <th scope="row">{coo['ID']}</th>
                   <td>{coo['target']}</td>
                   <td>{coo['openPeriod']}</td>
-                  <td>{coo['openOrNot']}</td>
+                  <td><Link to={{ 
+                        pathname: "/UploadDataset", 
+                        state:{ cooperationJson:coo}
+                        }}>
+                        upload file
+                      </Link></td>
                   <td>                    
                     <Link to={{ 
                       pathname: "/MemberCols", 

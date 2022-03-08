@@ -124,20 +124,16 @@ class ManageCooperation extends Component {
           </thead>
           <tbody id="request">
             { this.state.cooperations.map((cooperation, key) => {
-              let join
-              join= <td>
+              let result
+              let now = new Date()
+              let period = new Date(cooperation['openPeriod'])
+              result= now<period?<td>close</td> :<td>
                       <Link to={{ 
-                        pathname: "/JoinCooperation", 
+                        pathname: "/UploadResult", 
                         state:{ cooperationJson:cooperation}
                         }}>
-                        Join to share
+                        upload result
                       </Link>
-                      {/* <input
-                        type="button"
-                        value="Join to share"
-                        style={{cursor:'pointer'}}
-                        onClick={()=>this.handleJoin(cooperation['ID'])}
-                      /> */}
                     </td>
               return(
                 <tr key={key}>
@@ -158,8 +154,8 @@ class ManageCooperation extends Component {
                   </td>
                   <td>{cooperation['host']}</td>
                   <td>{cooperation['openPeriod']}</td>
-                  {cooperation['openOrNot']?<td>{cooperation['openOrNot'].toString()}</td>:<td>false</td>}
-                  {join}
+                  {now>period?<td>false</td> :<td>true</td>}
+                  {result}
                 </tr>
               )
             })}

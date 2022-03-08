@@ -147,6 +147,7 @@ class CreateCooperation extends Component {
       "target": this.state.target,
       "host": this.state.account,
       "memberDataset":memberDatasets,
+      "alreadyUpload":[],
       "openPeriod":endDate,
       "openOrNot":true,
       "columnNum":this.setState

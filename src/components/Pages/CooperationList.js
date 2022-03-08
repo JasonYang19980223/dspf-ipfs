@@ -125,7 +125,9 @@ class CooperationList extends Component {
           <tbody id="request">
             { this.state.cooperations.map((cooperation, key) => {
               let join
-              join= <td>
+              let now = new Date()
+              let period = new Date(cooperation['openPeriod'])
+              join=now>period?<td>close</td> :<td>
                       <Link to={{ 
                         pathname: "/JoinCooperation", 
                         state:{ cooperationJson:cooperation}
@@ -142,23 +144,17 @@ class CooperationList extends Component {
               return(
                 <tr key={key}>
                   <th scope="row">{cooperation['ID']} </th>
-                  <td>
+                  {now>period?<td>close</td>:<td>
                     <Link to={{ 
                     pathname: "/CooperationInform", 
                     state:{ cooperationJson:cooperation}
                     }}>
                     {cooperation['target']}
                     </Link>
-                    {/* <input
-                      type = "button"
-                      value={cooperation['target']}
-                      style={{cursor:'pointer'}}
-                      onClick={()=>this.handleCooperation(cooperation['ID'])}
-                    /> */}
-                  </td>
+                  </td>}
                   <td>{cooperation['host']}</td>
                   <td>{cooperation['openPeriod']}</td>
-                  {cooperation['openOrNot']?<td>{cooperation['openOrNot'].toString()}</td>:<td>false</td>}
+                  {now>period?<td>false</td>:<td>true</td>}
                   {join}
                 </tr>
               )
