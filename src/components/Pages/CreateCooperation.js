@@ -150,7 +150,8 @@ class CreateCooperation extends Component {
       "alreadyUpload":[],
       "openPeriod":endDate,
       "openOrNot":true,
-      "columnNum":this.setState
+      "columnNum":this.setState,
+      "result":''
     };
 
     //將成員資訊中，餐與合作案的部分新增創建的合作案ID

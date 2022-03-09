@@ -11,6 +11,7 @@ import MemberCols from "./components/Pages/MemberCols";
 import ManageCooperation from "./components/Pages/ManageCooperation";
 import UploadDataset from "./components/Pages/UploadDataset";
 import UploadResult from "./components/Pages/UploadResult";
+import DownloadFile from "./components/Pages/DownloadFile";
 
 import history from './History';
 
@@ -29,6 +30,7 @@ export default class Routes extends Component {
                     <Route path="/ManageCooperation" component={ManageCooperation} />
                     <Route path="/UploadDataset" component={UploadDataset} />
                     <Route path="/UploadResult" component={UploadResult} />
+                    <Route path="/DownloadFile" component={DownloadFile} />
                     <Route path="/" exact component={HomePage} />
                 </Switch>
             </BrowserRouter>

@@ -119,7 +119,8 @@ class ManageCooperation extends Component {
               <th scope="col">Host</th>
               <th scope="col">Period</th>
               <th scope="col">Open</th>
-              <th scope="col">Join</th>
+              <th scope="col">Download</th>
+              <th scope="col">result</th>
             </tr>
           </thead>
           <tbody id="request">
@@ -155,6 +156,13 @@ class ManageCooperation extends Component {
                   <td>{cooperation['host']}</td>
                   <td>{cooperation['openPeriod']}</td>
                   {now>period?<td>false</td> :<td>true</td>}
+                  {now>period?<td><Link to={{ 
+                        pathname: "/DownloadFile", 
+                        state:{ cooperationJson:cooperation}
+                        }}>
+                        download file
+                      </Link>
+                    </td>:<td>false</td>}
                   {result}
                 </tr>
               )

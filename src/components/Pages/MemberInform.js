@@ -138,7 +138,9 @@ class MemberInform extends Component {
                       col
                     </Link>
                   </td>
-                  <td>waiting</td>
+                  {coo['result']===''?<td>waiting</td>:<td>
+                        <a href={coo['result']} download>Click to download</a>
+                    </td>}
                 </tr>
               )
             })}
