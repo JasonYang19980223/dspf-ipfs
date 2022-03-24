@@ -4,19 +4,20 @@ import Nbar from '../Nbar.js';
 import platform from '../Load/platform.js'
 import history from '../../History';
 import { Link } from 'react-router-dom';
-//********合作案清單的介面***********
+//********管理合作案清單的介面***********
 class ManageCooperation extends Component {
   
   //account 使用者的地址
   //cooperations 合作案的list
+  //memJson 用來傳遞當前登入成員資訊的Json
   constructor(props){
     super(props)
     this.state = {
       account: '',
-      cooperations:[]
+      cooperations:[],
+      memJson:''
     }
     this.handleCooperation= this.handleCooperation.bind(this);
-    this.handleJoin= this.handleJoin.bind(this);
   }
 
   //進入頁面前先進行初始化，設定使用者地址，並確認是否為管理者 
@@ -93,18 +94,6 @@ class ManageCooperation extends Component {
     });
   }
 
-  //點選button: join to share 跳轉到joinCooperation的介面
-  //param: 合作案的ID  
-  async handleJoin(cooID) {
-    let path = "/JoinCooperation"; 
-    history.push({
-      pathname:path,
-      state:{
-        cooperationID:cooID
-      }
-    });
-  }
-
   render() {
     return (
       <div>
@@ -146,12 +135,6 @@ class ManageCooperation extends Component {
                     }}>
                     {cooperation['target']}
                     </Link>
-                    {/* <input
-                      type = "button"
-                      value={cooperation['target']}
-                      style={{cursor:'pointer'}}
-                      onClick={()=>this.handleCooperation(cooperation['ID'])}
-                    /> */}
                   </td>
                   <td>{cooperation['host']}</td>
                   <td>{cooperation['openPeriod']}</td>

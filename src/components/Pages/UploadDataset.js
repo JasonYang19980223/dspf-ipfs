@@ -14,12 +14,17 @@ class UploadDataset extends Component {
 
     constructor(props){
       //account 使用者的地址
-      //columns 組織能提供的欄位
+      //file 上傳加密過後的資料集
+      //fileUrl 加密過後的檔案的ipfs hash
+      //memJson 用來傳遞當前登入成員資訊的Json
+      //cooperationJson 提案的資訊
       super(props)
       this.state = {
         account:'',
         file:'',
-        fileUrl:''
+        fileUrl:'',
+        memJson:'',
+        cooperationJson:''
       }    
       this.handleOnSubmit=this.handleOnSubmit.bind(this);
       this.handleOnChange=this.handleOnChange.bind(this);
@@ -37,10 +42,11 @@ class UploadDataset extends Component {
       }
       else
         this.setState({manager:false});
-      console.log(this.props.location.state.cooperationJson)
+
       this.setState({
         cooperationJson:this.props.location.state.cooperationJson
       })
+
       if(await platform.methods.members(this.state.account).call()){
         let memHash =await platform.methods.memberHash(this.state.account).call()
         await this.getMemJson(memHash)
@@ -62,15 +68,18 @@ class UploadDataset extends Component {
         }.bind(this));
     }
 
+    //上傳至區塊鏈
     async handleClick (e){
+        //將要上船的ipfs hash加入提案資訊
         this.state.cooperationJson['alreadyUpload'].push([this.state.account,this.state.fileUrl])
+
         let cooperationJsonObj = JSON.stringify(this.state.cooperationJson);
         let ipfsCooperation = await ipfs.add(Buffer.from(cooperationJsonObj))
-        console.log(this.state.cooperationJson)
-        console.log(this.state.fileUrl)
+        //更新提案資訊
         await platform.methods.updateCooperation(this.state.cooperationJson['ID'],ipfsCooperation['path']).send({from:this.state.account})
     }
 
+    //上傳加密過後的資料集
     async handleOnChange (e){
         try {
             await this.setState({file:e.target.files[0]})
@@ -80,10 +89,10 @@ class UploadDataset extends Component {
         }  
     }
 
+    //將檔案上傳到ipfs
     async handleOnSubmit (e){
         try {
             let added = await ipfs.add(this.state.file)
-            console.log('hhi')
             let url = `https://ipfs.infura.io/ipfs/${added.path}?file=${this.state.file['name']}`
             this.setState({fileUrl:url})
         } catch (error) {

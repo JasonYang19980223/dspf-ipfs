@@ -6,15 +6,20 @@ import platform from '../Load/platform.js'
 import { create } from 'ipfs-http-client'
 const ipfs = create('https://ipfs.infura.io:5001') // (the default in Node.js)
 
-//ipfs api
-//const ipfs=create({host:'ipfs.infura.io',port:'5001',apiPath: '/api/v0'});
-
 //********上傳探勘結果的介面***********
 class UploadResult extends Component {
 
     constructor(props){
       //account 使用者的地址
-      //columns 組織能提供的欄位
+      //file 管理者上船的結果檔案
+      //fileUrl 探勘結果的hash地址
+      //totalAmount 該提案獲得的eth總量
+      //totalCols 該提案獲得的欄位總量
+      //amount 每個成員提供的欄位數量
+      //ethAmount 每個提供欄位成員能獲得的eth
+      //accs 提供欄位的成員地址陣列
+      //memJson 用來傳遞當前登入成員資訊的Json
+      
       super(props)
       this.state = {
         account:'',
@@ -24,7 +29,8 @@ class UploadResult extends Component {
         totalCols:0,
         amount:[],
         ethAmount:[],
-        accs:[]
+        accs:[],
+        memJson:''
       }    
       this.handleClick=this.handleClick.bind(this);
       this.handleSend=this.handleSend.bind(this);
@@ -37,46 +43,44 @@ class UploadResult extends Component {
       const accounts = await web3.eth.getAccounts();
       this.setState({ account: accounts[0] })
       const pm = await platform.methods.manager().call();
-      //console.log(pm);
+
       if(this.state.account === pm){
         this.setState({manager:true});
       }
       else
         this.setState({manager:false});
-      //console.log(this.props.location.state.cooperationJson)
+
       this.setState({
         cooperationJson:this.props.location.state.cooperationJson
       })
-      console.log(this.state.cooperationJson['memberDataset'].length)
 
-      console.log(this.state.cooperationJson['memberEth'].length)
       //貢獻欄位的帳號陣列
       let dataAccLen = this.state.cooperationJson['memberDataset'].length
-      console.log(dataAccLen)
       for(let i =0;i<dataAccLen;i++){
         this.setState({
           accs: [...this.state.accs, this.state.cooperationJson['memberDataset'][i][0]]
         })
         let datasetHash =  await platform.methods.getDataset(this.state.cooperationJson['memberDataset'][i][1]).call()
-        console.log(datasetHash)
         await this.getDatasetJson(datasetHash)
       }
-      console.log(this.state.accs)
-      console.log(this.state.amount)
+
+
       // 計算加密貨幣總數
       let ethAccLen = this.state.cooperationJson['memberEth'].length
       let total = 0;
       for(let i =0;i<ethAccLen;i++){
         total+=parseInt(this.state.cooperationJson['memberEth'][i][1]);
       }
+
       this.setState({
         totalAmount:total
       })
+
       if(await platform.methods.members(this.state.account).call()){
         let memHash =await platform.methods.memberHash(this.state.account).call()
         await this.getMemJson(memHash)
       }
-      console.log(this.state.totalAmount)
+
     }
 
 

@@ -13,6 +13,7 @@ class CreatePage extends Component {
   //phone 組織註冊的電話
   //email 組織註冊的信箱
   //isLogIn 該地址是否已成為成員
+  //memJson 用來傳遞當前登入成員資訊的Json
   constructor(props){
     super(props)
     this.state = {

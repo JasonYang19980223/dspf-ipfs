@@ -29,6 +29,7 @@ class MemberInform extends Component {
   //進入頁面前先進行初始化，設定使用者地址，並確認是否為管理者 
   //call getInit() 來獲取該成員參與的合作案 
   async componentWillMount() {
+    //判斷該組織是否已成為成員
     await this.check()
 
     const pm = await platform.methods.manager().call();
@@ -66,11 +67,8 @@ class MemberInform extends Component {
     }.bind(this));
   }
 
-  //獲取該成員參與的基本資訊和合作案
+  //獲取該成員參與的合作案
   async getInit(){
-    const accounts = await web3.eth.getAccounts()
-    this.setState({ account: accounts[0] })
-
     if(this.state.isLogIn){
       //獲取合作案
       let cooLen = this.props.location.state.memJson['cooperations'].length

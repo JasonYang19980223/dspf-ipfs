@@ -2,21 +2,22 @@ import React, { Component } from 'react';
 import web3 from '../Load/web3.js'
 import Nbar from '../Nbar.js';
 import platform from '../Load/platform.js'
-//********合作案清單的介面***********
+//********下載成員上傳的csv***********
 class DownloadFile extends Component {
   
   //account 使用者的地址
-  //cooperations 合作案的list
+  //datasetUrls 成員上傳檔案的hash地址
+  //memJson 用來傳遞當前登入成員資訊的Json
   constructor(props){
     super(props)
     this.state = {
       account: '',
-      datasetUrls:[]
+      datasetUrls:[],
+      memJson:''
     }
   }
 
   //進入頁面前先進行初始化，設定使用者地址，並確認是否為管理者 
-  //call getInit() 來獲取當前的所有合作案
   async componentWillMount() {
     const accounts = await web3.eth.getAccounts()
     this.setState({ account: accounts[0] })
@@ -52,12 +53,12 @@ class DownloadFile extends Component {
 
   //獲取合作案清單
   async getInit(){
-    //call 智能合約中的cooperationCnt 來判斷當前合作案的數量
     let datasetLen=0;
     let cooJson = this.props.location.state.cooperationJson
+    //已上傳檔案的長度
     datasetLen = cooJson['alreadyUpload'].length
     for (var i = 0; i < datasetLen; i++) {
-      //call 智能合約中的cooperations 來獲取該合作案
+      //獲取檔案的位址
       let datasetUrl = cooJson['alreadyUpload'][i][1]
       this.setState({
         datasetUrls: [...this.state.datasetUrls, datasetUrl]

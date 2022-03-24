@@ -9,11 +9,13 @@ class RequestList extends Component {
   
   //account 使用者的地址
   //cols 該成員提供的欄位
+  //memJson 用來傳遞當前登入成員資訊的Json
   constructor(props){
     super(props)
     this.state = {
       account: '',
-      cols:[]
+      cols:[],
+      memJson:''
     }
   }
 

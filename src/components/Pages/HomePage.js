@@ -6,6 +6,7 @@ import platform from '../Load/platform.js'
 //********創建主頁畫面***********
 class HomePage extends Component {
   //account 使用者的地址
+  //memJson 用來傳遞當前登入成員資訊的Json
   constructor(props){
     super(props)
     this.state = {

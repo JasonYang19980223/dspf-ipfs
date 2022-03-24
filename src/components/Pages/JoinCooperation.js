@@ -6,15 +6,15 @@ import platform from '../Load/platform.js'
 import { create } from 'ipfs-http-client'
 const ipfs = create('https://ipfs.infura.io:5001') // (the default in Node.js)
 
-//ipfs api
-//const ipfs=create({host:'ipfs.infura.io',port:'5001',apiPath: '/api/v0'});
-
 //********加入合作案的介面***********
 class JoinCooperation extends Component {
 
   constructor(props){
     //account 使用者的地址
     //columns 組織能提供的欄位
+    //EthNumber 組織參與要提供的eth
+    //cooperationJson 組織的json
+    //memJson 用來傳遞當前登入成員資訊的Json
     super(props)
     this.state = {
       account:'',
@@ -22,7 +22,9 @@ class JoinCooperation extends Component {
         index:Math.random(),
         colName:''
       }],
-      EthNumber:0
+      EthNumber:0,
+      cooperationJson:'',
+      memJson:''
     }    
     this.handleCol = this.handleCol.bind(this);
     this.handleClick = this.handleClick.bind(this);
@@ -35,16 +37,17 @@ class JoinCooperation extends Component {
     const accounts = await web3.eth.getAccounts();
     this.setState({ account: accounts[0] })
     const pm = await platform.methods.manager().call();
-    console.log(pm);
+
     if(this.state.account === pm){
       this.setState({manager:true});
     }
     else
       this.setState({manager:false});
-    console.log(this.props.location.state.cooperationJson)
+
     this.setState({
       cooperationJson:this.props.location.state.cooperationJson
     })
+
     if(await platform.methods.members(this.state.account).call()){
       let memHash =await platform.methods.memberHash(this.state.account).call()
       await this.getMemJson(memHash)
@@ -100,35 +103,23 @@ class JoinCooperation extends Component {
       columns: this.state.columns.filter(r => r !== record)
     });
   }
-  // async getJson(ipfshash){
-  //   let request = require('request');
-  //   await request(`https://ipfs.io/ipfs/${ipfshash}`, function (error, response, body) {
-  //     if (!error && response.statusCode === 200) {
-  //       let importedJSON = JSON.parse(body);
-  //       console.log(importedJSON);
-  //       this.setState({memberJson:importedJSON});
-  //     }
-  //     else
-  //       console.log('error')
-  //   }.bind(this));
-  // }
+
   //送出確認
   async handleClick(e) {
-    let createrHash = await platform.methods.memberHash(this.state.account).call()
-
+    //更新提案的資訊
     this.state.cooperationJson['memberDataset'].push([this.state.account,parseInt(await platform.methods.datasetCnt().call(),16)])
-    console.log(this.state.cooperationJson)
-
+    
+    //更新使用者的成員資訊
     this.state.memJson['cooperations'].push(this.state.cooperationJson['ID'])
     let newMemJson = this.state.memJson
+
     let datasetJson = {
       "ID": parseInt(await platform.methods.datasetCnt().call(),16),
       "cooID": this.state.cooperationJson['ID'],
       "ownerAddress": this.state.account,
       "columns":this.state.columns
     }
-    //call 智能合約的 addCooperationMem param: 合作案ID
-    //加入合作案
+
     let memJsonObj =JSON.stringify(newMemJson);
     let cooperationJsonObj = JSON.stringify(this.state.cooperationJson);
     let datasetJsonObj = JSON.stringify(datasetJson);
@@ -138,69 +129,42 @@ class JoinCooperation extends Component {
     let ipfsCooperation = await ipfs.add(Buffer.from(cooperationJsonObj))
     let ipfsDataset = await ipfs.add(Buffer.from(datasetJsonObj))
     let ifpsMem = await ipfs.add(Buffer.from(memJsonObj))
-    
-    console.log(ipfsCooperation['path'])
-    console.log(ipfsDataset['path'])
-    this.setState({Hash:ipfsCooperation['path']})
-
 
     platform.methods.updateCooperation(this.state.cooperationJson['ID'],ipfsCooperation['path']).send({from:this.state.account})
     platform.methods.createDataset(ipfsDataset['path']).send({ from: this.state.account })
     platform.methods.updateMember(ifpsMem['path']).send({ from: this.state.account })
-    //call 智能合約的 setDataset param: 設定對應的合作案ID
-    //新增資料集
-    //await platform.methods.setDataset(this.props.location.state.cooperationID).send({from:this.state.account})
-
-    //call 智能合約的 datasetCnt
-    //判斷資料集ID
-    // let dataid = await platform.methods.datasetCnt().call()
-
-    // //紀錄組織能提供的欄位上區塊鏈
-    // let columns = this.state.columns
-    // for( let i = 0 ;i<columns.length;i++){
-    //   //call 智能合約的 addColumn param: 欄位對應的資料集的ID
-    //   //設定資料集對應的欄位
-    //   await platform.methods.addColumn(dataid-1,columns[i]['name']).send({from:this.state.account})
-    // }
   }
+
+  //輸入要提供的加密貨幣
   async handleEth(e){
     this.setState({EthNumber:e.target.value});
   }
-  async handleSend(e){
-   
-    let createrHash = await platform.methods.memberHash(this.state.account).call()
 
+  //送出加密貨幣用來參與提案
+  async handleSend(e){
     this.state.cooperationJson['memberEth'].push([this.state.account,this.state.EthNumber])
-    console.log(this.state.cooperationJson)
 
     this.state.memJson['cooperations'].push(this.state.cooperationJson['ID'])
     let newMemJson = this.state.memJson
 
-    //call 智能合約的 addCooperationMem param: 合作案ID
-    //加入合作案
     let memJsonObj =JSON.stringify(newMemJson);
     let cooperationJsonObj = JSON.stringify(this.state.cooperationJson);
 
     console.log("Submitting file to ipfs...")
-
     let ipfsCooperation = await ipfs.add(Buffer.from(cooperationJsonObj))
     let ifpsMem = await ipfs.add(Buffer.from(memJsonObj))
-    
-    console.log(ipfsCooperation['path'])
-    this.setState({Hash:ipfsCooperation['path']})
-
 
     platform.methods.updateCooperation(this.state.cooperationJson['ID'],ipfsCooperation['path']).send({from:this.state.account})
     platform.methods.updateMember(ifpsMem['path']).send({ from: this.state.account })
     platform.methods.addCooperationWithEth().send({ from: this.state.account,value:this.state.EthNumber});
   }
   //console顯示設定欄位，用來Debug
-  async show(){
-    let columns = this.state.columns
-    for( let i = 0 ;i<columns.length;i++){
-      console.log(columns[i]['name'])
-    }
-  }
+  // async show(){
+  //   let columns = this.state.columns
+  //   for( let i = 0 ;i<columns.length;i++){
+  //     console.log(columns[i]['name'])
+  //   }
+  // }
 
 
   //顯示輸入框和對應function
@@ -252,19 +216,19 @@ class JoinCooperation extends Component {
           <label>
             <input
               type="button"
-              value="confirm"
+              value="Join by attribute"
               style={{cursor:'pointer'}}
               onClick={this.handleClick}
             />
           </label>
-          <label>
+          {/* <label>
             <input
               type="button"
               value="show"
               style={{cursor:'pointer'}}
               onClick={this.show}
             />
-          </label>
+          </label> */}
         </div>
         <br/>
         <br/>
@@ -276,7 +240,7 @@ class JoinCooperation extends Component {
           <label>
             <input
               type ="button"
-              value = "Join With ETH"
+              value = "Join by eth"
               style ={{cursor:'pointer'}}
               onClick={this.handleSend}
             />
