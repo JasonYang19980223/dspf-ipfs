@@ -80,9 +80,9 @@ contract DSPF {
   }
 
   //分派獎金
-  function distributePay(address payable[] memory members, uint256[] memory amount,uint256 totalAmount) public{
+  function distributePay(address payable[] memory getEthmembers, uint256[] memory amount,uint256 totalAmount) public{
       require(address(this).balance>=totalAmount,"Insufficient balance in faucet for withdrawal request");
-      for(uint i = 0;i<members.length;i++) 
-        members[i].transfer(amount[i]);
+      for(uint i = 0;i<getEthmembers.length;i++) 
+        getEthmembers[i].transfer(amount[i]);
   }
 }
