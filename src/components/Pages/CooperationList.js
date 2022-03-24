@@ -4,16 +4,18 @@ import Nbar from '../Nbar.js';
 import platform from '../Load/platform.js'
 import history from '../../History';
 import { Link } from 'react-router-dom';
-//********合作案清單的介面***********
+//********合作案列表的介面***********
 class CooperationList extends Component {
   
   //account 使用者的地址
   //cooperations 合作案的list
+  //memJson 用來傳遞當前登入成員資訊的Json
   constructor(props){
     super(props)
     this.state = {
       account: '',
-      cooperations:[]
+      cooperations:[],
+      memJson:''
     }
     this.handleCooperation= this.handleCooperation.bind(this);
     this.handleJoin= this.handleJoin.bind(this);
@@ -60,7 +62,7 @@ class CooperationList extends Component {
     let coolen=0;
     coolen = await platform.methods.cooperationCnt().call()
     for (var i = 0; i < coolen; i++) {
-      //call 智能合約中的cooperations 來獲取該合作案
+      //call 智能合約中的getCooperation 來獲取該合作案
       let cooperation = await platform.methods.getCooperation(i).call()
       await this.getCooJson(cooperation)
     }
@@ -125,6 +127,7 @@ class CooperationList extends Component {
           <tbody id="request">
             { this.state.cooperations.map((cooperation, key) => {
               let join
+              //判斷當前時間是否超過開放時間
               let now = new Date()
               let period = new Date(cooperation['openPeriod'])
               join=now>period?<td>close</td> :<td>
@@ -134,12 +137,6 @@ class CooperationList extends Component {
                         }}>
                         Join to share
                       </Link>
-                      {/* <input
-                        type="button"
-                        value="Join to share"
-                        style={{cursor:'pointer'}}
-                        onClick={()=>this.handleJoin(cooperation['ID'])}
-                      /> */}
                     </td>
               return(
                 <tr key={key}>

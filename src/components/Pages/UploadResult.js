@@ -19,9 +19,15 @@ class UploadResult extends Component {
       this.state = {
         account:'',
         file:'',
-        fileUrl:''
+        fileUrl:'',
+        totalAmount:0,
+        totalCols:0,
+        amount:[],
+        ethAmount:[],
+        accs:[]
       }    
       this.handleClick=this.handleClick.bind(this);
+      this.handleSend=this.handleSend.bind(this);
       this.handleOnSubmit=this.handleOnSubmit.bind(this);
       this.handleOnChange=this.handleOnChange.bind(this);
     }
@@ -41,13 +47,57 @@ class UploadResult extends Component {
       this.setState({
         cooperationJson:this.props.location.state.cooperationJson
       })
+      console.log(this.state.cooperationJson['memberDataset'].length)
+
+      console.log(this.state.cooperationJson['memberEth'].length)
+      //貢獻欄位的帳號陣列
+      let dataAccLen = this.state.cooperationJson['memberDataset'].length
+      console.log(dataAccLen)
+      for(let i =0;i<dataAccLen;i++){
+        this.setState({
+          accs: [...this.state.accs, this.state.cooperationJson['memberDataset'][i][0]]
+        })
+        let datasetHash =  await platform.methods.getDataset(this.state.cooperationJson['memberDataset'][i][1]).call()
+        console.log(datasetHash)
+        await this.getDatasetJson(datasetHash)
+      }
+      console.log(this.state.accs)
+      console.log(this.state.amount)
+      // 計算加密貨幣總數
+      let ethAccLen = this.state.cooperationJson['memberEth'].length
+      let total = 0;
+      for(let i =0;i<ethAccLen;i++){
+        total+=parseInt(this.state.cooperationJson['memberEth'][i][1]);
+      }
+      this.setState({
+        totalAmount:total
+      })
       if(await platform.methods.members(this.state.account).call()){
         let memHash =await platform.methods.memberHash(this.state.account).call()
         await this.getMemJson(memHash)
       }
+      console.log(this.state.totalAmount)
     }
 
 
+  //由IPFS獲取該資料集提供的欄位
+  async getDatasetJson(ipfshash){
+    let request = require('request');
+    await request(`https://ipfs.io/ipfs/${ipfshash}`, function (error, response, body) {
+      if (!error && response.statusCode === 200) {
+        let datasetJSON = JSON.parse(body);
+        let colLen =datasetJSON['columns'].length
+        this.setState({
+          amount: [...this.state.amount, colLen]
+        })
+        this.setState({
+          totalCols: this.state.totalCols+colLen
+        })
+      }
+      else
+        console.log('error')
+    }.bind(this));
+  }
 
 
     //由IPFS讀取成員JSON
@@ -96,6 +146,17 @@ class UploadResult extends Component {
         }  
     }
   
+    async handleSend (e){
+      let len = this.state.amount.length
+      let ethAmount=[]
+      for(let i = 0;i<len;i++){
+        ethAmount.push(this.state.totalAmount*this.state.amount[i]/this.state.totalCols)
+      }
+      console.log(this.state.accs)
+      console.log(this.state.totalAmount)
+      console.log(ethAmount)
+      await platform.methods.distributePay(this.state.accs,ethAmount,this.state.totalAmount).send({ from: this.state.account })
+    }
   
     //顯示輸入框和對應function
     render() {
@@ -111,6 +172,7 @@ class UploadResult extends Component {
               <br/>
               <br/>
           </div>
+          <br></br>
           <div>
             <h2> Update to chain </h2>
             <label>
@@ -119,6 +181,18 @@ class UploadResult extends Component {
                 value="confirm"
                 style={{cursor:'pointer'}}
                 onClick={this.handleClick}
+              />
+            </label>
+            </div>
+            <br></br>
+            <div>
+            <h2> Send Ether to contributed-members </h2>
+            <label>
+              <input
+                type="button"
+                value="confirm"
+                style={{cursor:'pointer'}}
+                onClick={this.handleSend}
               />
             </label>
             </div>

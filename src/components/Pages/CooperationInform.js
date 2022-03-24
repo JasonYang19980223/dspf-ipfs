@@ -9,12 +9,15 @@ class CooperationInform extends Component {
   constructor(props){
 
     //account 使用者的地址
-    //mems 參與合作案的成員
+    //mems 透過欄位參與合作案的成員
+    //memJson 用來傳遞當前登入成員資訊的Json
+    //ethmems 透過加密貨幣參與合作案的成員
     super(props)
     this.state = {
       account: '',
       mems:[],
-      memJsons:[]
+      memJson:'',
+      ethmems:[]
     }
     this.getInit= this.getInit.bind(this);
   }
@@ -22,9 +25,11 @@ class CooperationInform extends Component {
   //進入頁面前先進行初始化，設定使用者地址，並確認是否為管理者 
   //call getInit() 來獲取該合作案參與的成員資訊
   async componentWillMount() {
+    //讀取使用者的帳號
     const accounts = await web3.eth.getAccounts()
     this.setState({ account: accounts[0] })
 
+    //判斷是否為平台管理者
     const pm = await platform.methods.manager().call();
     if(this.state.account === pm){
       this.setState({manager:true});
@@ -59,28 +64,48 @@ class CooperationInform extends Component {
 
 
   async getInit(){
-    //由合作案的JSON初始化參與的成員
-    this.setState({
-      memsAddress:  this.props.location.state.cooperationJson['memberDataset']
-    })
-
+    //由合作案的JSON導入參與的成員
+    let memsAddress=this.props.location.state.cooperationJson['memberDataset']
+    let memsEthAddress=this.props.location.state.cooperationJson['memberEth']
     //參與的成員數
-    let memLen = this.state.memsAddress.length
-    for (var i = 0; i < memLen; i++) {
+    let memLen = memsAddress.length
+    for (let i = 0; i < memLen; i++) {
       //成員資訊的ipfs hash
-      let memhash = await platform.methods.memberHash(this.state.memsAddress[i][0]).call()
-      await this.getMembersJson(memhash,i)
+      let memhash = await platform.methods.memberHash(memsAddress[i][0]).call()
+      await this.getMembersJson(memhash,memsAddress[i][0])
+    }
+
+    let memEthLen = memsEthAddress.length
+    for (let j = 0; j < memEthLen; j++) {
+      //成員資訊的ipfs hash
+      let memhash = await platform.methods.memberHash(memsEthAddress[j][0]).call()
+      await this.getEthMembersJson(memhash,memsEthAddress[j][0])
     }
   }
 
-  //由IPFS獲取有參與合作案的成員
-  async getMembersJson(ipfshash,i){
+  //由IPFS獲取有透過欄位參與合作案的成員
+  async getMembersJson(ipfshash,addr){
     let request = require('request');
     await request(`https://ipfs.io/ipfs/${ipfshash}`, function (error, response, body) {
       if (!error && response.statusCode === 200) {
         let memJSON = JSON.parse(body);
         this.setState({
-          mems: [...this.state.mems, [memJSON['orgName'],memJSON['phone'],memJSON['email'],this.state.memsAddress[i][0]]]
+          mems: [...this.state.mems, [memJSON['orgName'],memJSON['phone'],memJSON['email'],addr]]
+        })
+      }
+      else
+        console.log('error')
+    }.bind(this));
+  }
+
+  //由IPFS獲取有透過eth參與合作案的成員
+  async getEthMembersJson(ipfshash,addr){
+    let request = require('request');
+    await request(`https://ipfs.io/ipfs/${ipfshash}`, function (error, response, body) {
+      if (!error && response.statusCode === 200) {
+        let memJSON = JSON.parse(body);
+        this.setState({
+          ethmems: [...this.state.ethmems, [memJSON['orgName'],memJSON['phone'],memJSON['email'],addr]]
         })
       }
       else
@@ -94,6 +119,7 @@ class CooperationInform extends Component {
         <Nbar account={this.state.account} manager ={this.state.manager}memJson={this.state.memJson}/>
         <h3>Account: {this.state.account}</h3>
         <br/>
+        <h2>Supply Attributes</h2>
         <table className="table">
           <thead>
             <tr>
@@ -123,6 +149,33 @@ class CooperationInform extends Component {
                       col
                     </Link>
                   </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <h2>Supply ETH</h2>
+        <table className="table">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Phone</th>
+              <th scope="col">Email</th>
+              <th scope="col">Addr</th>
+            </tr>
+          </thead>
+          <tbody id="request">
+            { this.state.ethmems.map((mem, key) => {
+              return(
+                <tr key={key}>
+                  <td>{mem[0]}</td>
+                  <td>{mem[1]}</td>
+                  <td>{mem[2]}</td>
+                  <td>{mem[3]}</td>
                 </tr>
               )
             })}

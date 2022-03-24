@@ -13,6 +13,9 @@ class CreateCooperation extends Component {
   //columns 組織能提供的欄位
   //primaryKey 組織選擇的探勘演算法
   //target 組織想探究的目的
+  //openingPeriod 提案開放天數
+  //colNeed 提案需要的欄位數量
+  //memJson 用來傳遞當前登入成員資訊的Json
   constructor(props){
     super(props)
     this.state = {
@@ -24,7 +27,8 @@ class CreateCooperation extends Component {
       primaryKey:'',
       target:'',
       openingPeriod:'',
-      colNeed:0
+      colNeed:0,
+      memJson:''
     }    
     this.handleCol = this.handleCol.bind(this);
     this.handlePrimaryKey = this.handlePrimaryKey.bind(this);
@@ -83,7 +87,7 @@ class CreateCooperation extends Component {
     this.setState({columns});
   }
 
-  //設定探勘演算法
+  //設定主鍵
   handlePrimaryKey(e) {
     this.setState({primaryKey:e.target.value});
   }
@@ -124,15 +128,10 @@ class CreateCooperation extends Component {
 
   //送出確認
   async handleClick(e) {
-    //透過合約獲得成員資訊的Hash
-    let createrHash = await platform.methods.memberHash(this.state.account).call()
-    
-    //獲取成員資訊JSON
-    this.getMemJson(createrHash);
-
     //將成員地址和datasetID綁定
     let memberDatasets = [[this.state.account,parseInt(await platform.methods.datasetCnt().call(),16)]]
 
+    //把天數加上當下日期
     function addDays(date, days) {
       var result = new Date(date);
       result.setDate(result.getDate() + days);
@@ -140,17 +139,17 @@ class CreateCooperation extends Component {
     }    
     let date = new Date()
     let endDate = addDays(date,parseInt(this.state.openingPeriod))
-    console.log(endDate)
+
     //新建合作案資訊的JSON
     let cooperationJson = {
       "ID": parseInt(await platform.methods.cooperationCnt().call(),16),
       "target": this.state.target,
       "host": this.state.account,
       "memberDataset":memberDatasets,
+      "memberEth":[],
       "alreadyUpload":[],
       "openPeriod":endDate,
       "openOrNot":true,
-      "columnNum":this.setState,
       "result":''
     };
 
@@ -178,31 +177,23 @@ class CreateCooperation extends Component {
     let ipfsCooperation = await ipfs.add(Buffer.from(cooperationJsonObj))
     let ipfsDataset = await ipfs.add(Buffer.from(datasetJsonObj))
     let ifpsMem = await ipfs.add(Buffer.from(memJsonObj))
-    console.log("Submitting file to ipfs...")
 
-    //將區塊鏈上的IPFS hash更新
+    //將區塊鏈上的提案IPFS hash更新
     platform.methods.createCooperation(ipfsCooperation['path']).send({ from: this.state.account }).then((r) => {
       return this.setState({ cooperationHash: ipfsCooperation['path'] })
     })
+
+    //創建資料集的hash到鏈上
     platform.methods.createDataset(ipfsDataset['path']).send({ from: this.state.account })
+
+    //更新區塊鏈上成員的ipfs hash
     platform.methods.updateMember(ifpsMem['path']).send({ from: this.state.account })
   }
 
   //console顯示設定欄位，用來Debug
   async show(){
-    const amount = '2'; // Willing to send 2 ethers
-    const amountToSend = web3.utils.toWei(amount);
-    await platform.methods.addCooperationWithEth().send({ from: this.state.account,value: amountToSend})
-    // function addDays(date, days) {
-    //   var result = new Date(date);
-    //   result.setDate(result.getDate() + days);
-    //   return result;
-    // }    
-    // let date = new Date()
-    // let endDate = addDays(date,parseInt(this.state.openingPeriod))
-    // console.log(endDate)
-    // if(date>endDate) console.log('a')
-
+    let contractBalance = parseInt(await platform.methods.getContractBalance().call(),16);
+    console.log(contractBalance)
   }
 
   //顯示輸入框和對應function
@@ -239,7 +230,7 @@ class CreateCooperation extends Component {
                 <div key={val.index}>
                   <div className="col-row" >
                     <label>
-                      <input type="text" placeholder="column" style={styleInput} onChange={(event)=>this.handleCol(idx,event)} />
+                      <input type="text" placeholder="attribute" style={styleInput} onChange={(event)=>this.handleCol(idx,event)} />
                     </label>
                   </div>
                   <div className ="col p-4">

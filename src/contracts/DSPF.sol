@@ -73,4 +73,16 @@ contract DSPF {
 
   //透過加密貨幣參與提案
   function addCooperationWithEth() public payable memberOnly{}
+
+  //回傳合約餘額
+  function getContractBalance() public view returns(uint) {
+    return address(this).balance;
+  }
+
+  //分派獎金
+  function distributePay(address payable[] memory members, uint256[] memory amount,uint256 totalAmount) public{
+      require(address(this).balance>=totalAmount,"Insufficient balance in faucet for withdrawal request");
+      for(uint i = 0;i<members.length;i++) 
+        members[i].transfer(amount[i]);
+  }
 }

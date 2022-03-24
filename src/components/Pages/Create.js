@@ -8,7 +8,30 @@ const ipfs = create('https://ipfs.infura.io:5001') // (the default in Node.js)
 
 
 class Create extends Component {
-
+  constructor(props) {
+    super(props)
+    
+    //memHash
+    //acount 當前使用者帳號
+    //manager 判斷當前是否為平台使用者
+    //orgnizationName 組織名稱
+    //phone 組織電話
+    //email 組織信箱
+    //memJson 用來傳遞當前登入成員資訊的Json
+    this.state = {
+      memHash: '',
+      account:'',
+      manager: '',
+      orgnizationName:'',
+      phone:'',
+      email:'',
+      memJson:''
+    }
+    this.handleName = this.handleName.bind(this);
+    this.handlePhone = this.handlePhone.bind(this);
+    this.handleEmail = this.handleEmail.bind(this);
+    this.handleClick = this.handleClick.bind(this);
+  }
   async componentWillMount() {
     // Load account
     const accounts = await web3.eth.getAccounts()
@@ -21,26 +44,6 @@ class Create extends Component {
     else
       this.setState({manager:false});
   }
-
-  constructor(props) {
-    super(props)
-
-    this.state = {
-      memHash: '',
-      account: null,
-      manager: '',
-      orgnizationName:'',
-      phone:'',
-      email:'',
-      memJson:''
-    }
-    this.handleName = this.handleName.bind(this);
-    this.handlePhone = this.handlePhone.bind(this);
-    this.handleEmail = this.handleEmail.bind(this);
-    this.handleClick = this.handleClick.bind(this);
-    this.handleGet = this.handleGet.bind(this);
-  }
-
   //設定組織名稱
   handleName(e) {
     this.setState({orgnizationName: e.target.value});
@@ -69,25 +72,7 @@ class Create extends Component {
     console.log(cid['path'])
     await contract.methods.register(cid['path']).send({ from: this.state.account })
   }
-
-  async handleGet(e) {
-    let memHash = await contract.methods.memberHash(this.state.account).call()
-    console.log(memHash)
-    let request = require('request');
-    await request(`https://ipfs.io/ipfs/${memHash}`, function (error, response, body) {
-      if (!error && response.statusCode === 200) {
-        let importedJSON = JSON.parse(body);
-        console.log(importedJSON)
-        this.setState({
-          memJson:importedJSON
-        })
-      }
-      else
-        console.log('error')
-    }.bind(this));
-  }
-
-  //QmT7qMC1ietmdH4W8CE54ezKnYrhcEvJMMUTTwkXe8kpwZ
+  
   render() {
     const styleInput={
       border:'2px solid'
@@ -114,14 +99,6 @@ class Create extends Component {
               value="confirm"
               style={{cursor:'pointer'}}
               onClick={this.handleClick}
-            />
-          </label>
-          <label>
-            <input
-              type="button"
-              value="get"
-              style={{cursor:'pointer'}}
-              onClick={this.handleGet}
             />
           </label>
           <br/>

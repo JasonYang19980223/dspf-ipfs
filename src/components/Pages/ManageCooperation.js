@@ -128,7 +128,7 @@ class ManageCooperation extends Component {
               let result
               let now = new Date()
               let period = new Date(cooperation['openPeriod'])
-              result= now<period?<td>close</td> :<td>
+              result= now>period?<td>close</td> :<td>
                       <Link to={{ 
                         pathname: "/UploadResult", 
                         state:{ cooperationJson:cooperation}
