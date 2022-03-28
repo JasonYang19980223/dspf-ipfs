@@ -74,7 +74,7 @@ class MemberInform extends Component {
       let cooLen = this.props.location.state.memJson['cooperations'].length
       for(let i = 0;i<cooLen;i++){
         let cooHash = await platform.methods.getCooperation(this.props.location.state.memJson['cooperations'][i]).call()
-        this.getCooJson(cooHash)
+        await this.getCooJson(cooHash)
       }
     }
 

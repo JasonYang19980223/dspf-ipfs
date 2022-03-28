@@ -3,6 +3,9 @@ import web3 from '../Load/web3.js';
 import contract from '../Load/platform.js'
 import { create } from 'ipfs-http-client'
 import Nbar from '../Nbar.js';
+
+import '../CSS/Create.css'
+
 // connect to ipfs daemon API server
 const ipfs = create('https://ipfs.infura.io:5001') // (the default in Node.js)
 
@@ -80,29 +83,32 @@ class Create extends Component {
     return (
       <div>
         <Nbar account={this.state.account} manager={this.state.manager}memJson={this.state.memJson}/> 
-        <form style={{margin:'5px'}}>
-          <label>
-            <input type="text" placeholder="orginization name" style={styleInput} onChange={ this.handleName } />
-          </label>
-          <br/>
-          <label>
-            <input type="text" placeholder="phone" style={styleInput} onChange={ this.handlePhone } />
-          </label>
-          <br/>
-          <label>
-            <input type="text" placeholder="email" style={styleInput} onChange={ this.handleEmail } />
-          </label>
-          <br/>
-          <label>
-            <input
-              type="button"
-              value="confirm"
-              style={{cursor:'pointer'}}
-              onClick={this.handleClick}
-            />
-          </label>
-          <br/>
-        </form>
+        <h1 style={{textAlign:'center'}}>Create Account</h1>
+          <div className="container">
+            <form className='child' style={{margin:'5px'}}>
+              <label>
+                <input type="text" placeholder="orginization name" style={styleInput} onChange={ this.handleName } />
+              </label>
+              <br/>
+              <label>
+                <input type="text" placeholder="phone" style={styleInput} onChange={ this.handlePhone } />
+              </label>
+              <br/>
+              <label>
+                <input cols ="30" type="text" placeholder="email" style={styleInput} onChange={ this.handleEmail } />
+              </label>
+              <br/>
+              <label>
+                <input
+                  type="button"
+                  value="confirm"
+                  style={{cursor:'pointer'}}
+                  onClick={this.handleClick}
+                />
+              </label>
+              <br/>
+            </form>
+          </div>
       </div>
     );
   }

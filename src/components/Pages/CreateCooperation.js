@@ -202,32 +202,32 @@ class CreateCooperation extends Component {
       border:'2px solid'
     };
     return (
-      <div>
+      <div >
         <Nbar account={this.state.account} manager={this.state.manager}memJson={this.state.memJson}/>
-        <div>
+        <div className='container'>
           <div>
-            <h2> Create cooperation </h2>
-              <label>
-                <input type="text" placeholder="target" style={styleInput} onChange={ this.handleTarget } />
+            <h2 style={{textAlign:'center'}}> Create cooperation </h2>
+              <label style={{display: 'block',textAlign:'center'}}>
+               <input type="text" placeholder="cooperation name" style={styleInput} onChange={ this.handleTarget } />
               </label>
-              <br/>
-              <label>
+              <label style={{display: 'block',textAlign:'center'}}>
                <input type="text" placeholder="primary Key" style={styleInput} onChange={ this.handlePrimaryKey } />
               </label>
-              <br/>
-              <label>
+              <label style={{display: 'block',textAlign:'center'}}>
                <input type="text" placeholder="opening period (day)" style={styleInput} onChange={ this.handleOpeningPreiod } />
-              </label>
-              <br/>
-              <label>
+              </label >
+              <label style={{display: 'block',textAlign:'center'}}>
                <input type="text" placeholder="column need" style={styleInput} onChange={ this.handleColNeed } />
+              </label>
+              <label style={{display: 'block',textAlign:'center'}}>
+                <textarea rows="4" cols="50" type="text" placeholder="description" style={styleInput} />
               </label>
           </div>    
           <div>
-            <h2> Set Column </h2>  
+            <h2 style={{textAlign:'center'}}> Set Column </h2>  
             {this.state.columns.map((val,idx)=>{
               return(
-                <div key={val.index}>
+                <div style={{textAlign:'center'}} key={val.index}>
                   <div className="col-row" >
                     <label>
                       <input type="text" placeholder="attribute" style={styleInput} onChange={(event)=>this.handleCol(idx,event)} />
@@ -259,8 +259,8 @@ class CreateCooperation extends Component {
             <br/>
         </div>
         <div>
-          <h2> Upload To IPFS </h2>
-          <label>
+          <h2 style={{textAlign:'center'}}> Upload To IPFS </h2>
+          <label style={{display: 'block',textAlign:'center'}}>
             <input
               type="button"
               value="confirm"
@@ -268,7 +268,7 @@ class CreateCooperation extends Component {
               onClick={this.handleClick}
             />
           </label>
-          <label>
+          <label style={{display: 'block',textAlign:'center'}}>
             <input
               type="button"
               value="show"

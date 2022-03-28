@@ -1,0 +1,14 @@
+.container {
+    width: 900px;
+    height: 300px;
+    
+    position: relative;
+}
+.child {
+    position: absolute;
+    top: 40%;
+    left:0%;
+    transform: translateY(-50%);
+    text-align: center;
+    width: 100%;
+}
