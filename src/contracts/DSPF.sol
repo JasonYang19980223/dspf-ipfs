@@ -4,6 +4,7 @@ contract DSPF {
   //平台管理者帳號
   address public manager;
   mapping (address => bool) public members;
+
   mapping (address => string) public memberHash;
   mapping (uint => string) public cooperationHash;
   mapping (uint => string) public datasetHash;
@@ -84,5 +85,8 @@ contract DSPF {
       require(address(this).balance>=totalAmount,"Insufficient balance in faucet for withdrawal request");
       for(uint i = 0;i<getEthmembers.length;i++) 
         getEthmembers[i].transfer(amount[i]);
+  }
+  function kill() public {
+        if (msg.sender == manager) selfdestruct(payable(manager)); //銷毀合約並將合約內的金額轉回給合約建立者地址
   }
 }
