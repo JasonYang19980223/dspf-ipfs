@@ -139,7 +139,7 @@ class ManageCooperation extends Component {
                   <td>{cooperation['host']}</td>
                   <td>{cooperation['openPeriod']}</td>
                   {now>period?<td>false</td> :<td>true</td>}
-                  {now>period?<td><Link to={{ 
+                  {now<period?<td><Link to={{ 
                         pathname: "/DownloadFile", 
                         state:{ cooperationJson:cooperation}
                         }}>

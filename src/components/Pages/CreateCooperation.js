@@ -32,6 +32,8 @@ class CreateCooperation extends Component {
     }    
     this.handleCol = this.handleCol.bind(this);
     this.handlePrimaryKey = this.handlePrimaryKey.bind(this);
+    this.handlejoinEthNeed= this.handlejoinEthNeed.bind(this);
+    this.handlejoinColNeed= this.handlejoinColNeed.bind(this);
     this.handleOpeningPreiod = this.handleOpeningPreiod.bind(this);
     this.handleTarget = this.handleTarget.bind(this);
     this.handleColNeed = this.handleColNeed.bind(this);
@@ -106,6 +108,16 @@ class CreateCooperation extends Component {
   handleColNeed(e) {
     this.setState({colNeed:e.target.value});
   }
+
+  //設定參加提案欄位需求數量
+  handlejoinColNeed(e) {
+    this.setState({joinColNeed:e.target.value});
+  }
+
+  //設定參加提案eth需求數量
+  handlejoinEthNeed(e) {
+    this.setState({joinEthNeed:e.target.value});
+  }    
   //新增欄位
   addCol(){
     this.setState(prevState=>({
@@ -148,6 +160,9 @@ class CreateCooperation extends Component {
       "memberDataset":memberDatasets,
       "memberEth":[],
       "alreadyUpload":[],
+      "totalColNeed":this.state.colNeed,
+      "joinColNeed":this.state.joinColNeed,
+      "joinEthNeed":this.state.joinEthNeed,
       "openPeriod":endDate,
       "openOrNot":true,
       "result":''
@@ -216,6 +231,12 @@ class CreateCooperation extends Component {
               <label style={{display: 'block',textAlign:'center'}}>
                <input type="text" placeholder="opening period (day)" style={styleInput} onChange={ this.handleOpeningPreiod } />
               </label >
+              <label style={{display: 'block',textAlign:'center'}}>
+               <input type="text" placeholder="join col need" style={styleInput} onChange={ this.handlejoinColNeed } />
+              </label>
+              <label style={{display: 'block',textAlign:'center'}}>
+               <input type="text" placeholder="join eth need" style={styleInput} onChange={ this.handlejoinEthNeed } />
+              </label>
               <label style={{display: 'block',textAlign:'center'}}>
                <input type="text" placeholder="column need" style={styleInput} onChange={ this.handleColNeed } />
               </label>

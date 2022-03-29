@@ -95,7 +95,7 @@ class Create extends Component {
               </label>
               <br/>
               <label>
-                <input cols ="30" type="text" placeholder="email" style={styleInput} onChange={ this.handleEmail } />
+                <input type="text" placeholder="email" style={styleInput} onChange={ this.handleEmail } />
               </label>
               <br/>
               <label>
