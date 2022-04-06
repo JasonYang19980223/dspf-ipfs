@@ -123,7 +123,7 @@ class CooperationList extends Component {
     if(this.state.alarm===true)
       return <h3 style={{textAlign:'center'}}>You must log in metamask first</h3>
     if(this.state.isLoading){
-      return <h3 style={{textAlign:'center'}}>Loading</h3>
+      return <ReactLoading className='loader' type ={'bars'}/>
     }
     return (
       <div>
