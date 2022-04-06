@@ -30,7 +30,8 @@ class UploadResult extends Component {
         amount:[],
         ethAmount:[],
         accs:[],
-        memJson:''
+        memJson:'',
+        alarm:false
       }    
       this.handleClick=this.handleClick.bind(this);
       this.handleSend=this.handleSend.bind(this);
@@ -41,46 +42,48 @@ class UploadResult extends Component {
     //進入頁面前先進行初始化，設定使用者地址，並確認是否為管理者
     async componentWillMount() {
       const accounts = await web3.eth.getAccounts();
-      this.setState({ account: accounts[0] })
-      const pm = await platform.methods.manager().call();
+      if(accounts.length===0) this.setState({alarm:true})
+      else{
+        this.setState({ account: accounts[0] })
+        const pm = await platform.methods.manager().call();
 
-      if(this.state.account === pm){
-        this.setState({manager:true});
-      }
-      else
-        this.setState({manager:false});
+        if(this.state.account === pm){
+          this.setState({manager:true});
+        }
+        else
+          this.setState({manager:false});
 
-      this.setState({
-        cooperationJson:this.props.location.state.cooperationJson
-      })
-
-      //貢獻欄位的帳號陣列
-      let dataAccLen = this.state.cooperationJson['memberDataset'].length
-      for(let i =0;i<dataAccLen;i++){
         this.setState({
-          accs: [...this.state.accs, this.state.cooperationJson['memberDataset'][i][0]]
+          cooperationJson:this.props.location.state.cooperationJson
         })
-        let datasetHash =  await platform.methods.getDataset(this.state.cooperationJson['memberDataset'][i][1]).call()
-        await this.getDatasetJson(datasetHash)
+
+        //貢獻欄位的帳號陣列
+        let dataAccLen = this.state.cooperationJson['memberDataset'].length
+        for(let i =0;i<dataAccLen;i++){
+          this.setState({
+            accs: [...this.state.accs, this.state.cooperationJson['memberDataset'][i][0]]
+          })
+          let datasetHash =  await platform.methods.getDataset(this.state.cooperationJson['memberDataset'][i][1]).call()
+          await this.getDatasetJson(datasetHash)
+        }
+
+
+        // 計算加密貨幣總數
+        let ethAccLen = this.state.cooperationJson['memberEth'].length
+        let total = 0;
+        for(let i =0;i<ethAccLen;i++){
+          total+=parseInt(this.state.cooperationJson['memberEth'][i][1]);
+        }
+
+        this.setState({
+          totalAmount:total
+        })
+
+        if(await platform.methods.members(this.state.account).call()){
+          let memHash =await platform.methods.memberHash(this.state.account).call()
+          await this.getMemJson(memHash)
+        }
       }
-
-
-      // 計算加密貨幣總數
-      let ethAccLen = this.state.cooperationJson['memberEth'].length
-      let total = 0;
-      for(let i =0;i<ethAccLen;i++){
-        total+=parseInt(this.state.cooperationJson['memberEth'][i][1]);
-      }
-
-      this.setState({
-        totalAmount:total
-      })
-
-      if(await platform.methods.members(this.state.account).call()){
-        let memHash =await platform.methods.memberHash(this.state.account).call()
-        await this.getMemJson(memHash)
-      }
-
     }
 
 
@@ -166,6 +169,8 @@ class UploadResult extends Component {
   
     //顯示輸入框和對應function
     render() {
+      if(this.state.alarm===true)
+        return <h3 style={{textAlign:'center'}}>You must log in metamask first</h3>
       return (
         <div>
           <Nbar account={this.state.account} manager={this.state.manager}memJson={this.state.memJson}/>

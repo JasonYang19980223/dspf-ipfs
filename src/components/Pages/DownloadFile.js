@@ -13,26 +13,30 @@ class DownloadFile extends Component {
     this.state = {
       account: '',
       datasetUrls:[],
-      memJson:''
+      memJson:'',
+      alarm:false
     }
   }
 
   //進入頁面前先進行初始化，設定使用者地址，並確認是否為管理者 
   async componentWillMount() {
     const accounts = await web3.eth.getAccounts()
-    this.setState({ account: accounts[0] })
-    const pm = await platform.methods.manager().call();
-    if(this.state.account === pm){
-      this.setState({manager:true});
-    }
-    else
-      this.setState({manager:false});
-    await this.getInit();
-        
-    //若成員已註冊，從IPFS抓取其JSON資料
-    if(await platform.methods.members(this.state.account).call()){
-      let memHash =await platform.methods.memberHash(this.state.account).call()
-      await this.getMemJson(memHash)
+    if(accounts.length===0) this.setState({alarm:true})
+    else{
+      this.setState({ account: accounts[0] })
+      const pm = await platform.methods.manager().call();
+      if(this.state.account === pm){
+        this.setState({manager:true});
+      }
+      else
+        this.setState({manager:false});
+      await this.getInit();
+          
+      //若成員已註冊，從IPFS抓取其JSON資料
+      if(await platform.methods.members(this.state.account).call()){
+        let memHash =await platform.methods.memberHash(this.state.account).call()
+        await this.getMemJson(memHash)
+      }
     }
   }
 
@@ -68,6 +72,8 @@ class DownloadFile extends Component {
 
 
   render() {
+    if(this.state.alarm===true)
+      return <h3 style={{textAlign:'center'}}>You must log in metamask first</h3>
     return (
       <div>
         <Nbar account={this.state.account} manager ={this.state.manager}memJson={this.state.memJson}/>

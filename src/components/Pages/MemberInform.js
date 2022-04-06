@@ -4,6 +4,7 @@ import Nbar from '../Nbar.js';
 import platform from '../Load/platform.js'
 import history from '../../History';
 import { Link } from 'react-router-dom';
+import ReactLoading from 'react-loading';
 //********成員基本資訊和參與了什麼合作案的介面***********
 class MemberInform extends Component {
   
@@ -21,7 +22,8 @@ class MemberInform extends Component {
       email:'',
       cooperations:[],
       isLogIn:false,
-      isLoading:true
+      isLoading:true,
+      alarm:false
     }
     this.getInit= this.getInit.bind(this);
     this.getCooJson= this.getCooJson.bind(this);
@@ -32,18 +34,21 @@ class MemberInform extends Component {
   async componentWillMount() {
     //判斷該組織是否已成為成員
     const accounts = await web3.eth.getAccounts()
-    this.setState({ account: accounts[0] })
-    this.setState({isLogIn: await platform.methods.members(accounts[0]).call()})
+    if(accounts.length===0) this.setState({alarm:true})
+    else{
+      this.setState({ account: accounts[0] })
+      this.setState({isLogIn: await platform.methods.members(accounts[0]).call()})
 
-    const pm = await platform.methods.manager().call();
-    if(this.state.account === pm){
-      this.setState({manager:true});
-    }
-    else
-      this.setState({manager:false});
+      const pm = await platform.methods.manager().call();
+      if(this.state.account === pm){
+        this.setState({manager:true});
+      }
+      else
+        this.setState({manager:false});
 
-    if(this.state.isLogIn){
-      await this.getInit()
+      if(this.state.isLogIn){
+        await this.getInit()
+      }
     }
 
   }
@@ -71,12 +76,14 @@ class MemberInform extends Component {
   async getInit(){
     if(this.state.isLogIn){
       //獲取合作案
-
-      let cooLen = this.props.location.state.memJson['cooperations'].length
-      if(cooLen === 0) return this.setState({isLoading:false})
-      for(let i = 0;i<cooLen;i++){
-        let cooHash = await platform.methods.getCooperation(this.props.location.state.memJson['cooperations'][i]).call()
-        await this.getCooJson(cooHash,i,cooLen)
+      console.log(this.props.location.state.memJson)
+      if(this.props.location.state.memJson!==''){
+        let cooLen = this.props.location.state.memJson['cooperations'].length
+        if(cooLen === 0) this.setState({isLoading:false})
+        for(let i = 0;i<cooLen;i++){
+          let cooHash = await platform.methods.getCooperation(this.props.location.state.memJson['cooperations'][i]).call()
+          await this.getCooJson(cooHash,i,cooLen)
+        }
       }
     }
 
@@ -96,8 +103,10 @@ class MemberInform extends Component {
   }
 
   render() {
+    if(this.state.alarm===true)
+      return <h3 style={{textAlign:'center'}}>You must log in metamask first</h3>
     if(this.state.isLoading){
-      return <h3 style={{textAlign:'center'}}>Loading</h3>
+      return <ReactLoading className='loader' type ={'bars'}/>
     }
     return (
       <div>

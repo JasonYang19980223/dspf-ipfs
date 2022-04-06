@@ -12,3 +12,10 @@
     text-align: center;
     width: 100%;
 }
+.loader {
+    position: relative;
+    top: calc(50%);
+    left: calc(50%);
+    width: 6em;
+    height: 6em;
+  }

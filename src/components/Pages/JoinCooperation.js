@@ -4,6 +4,7 @@ import web3 from '../Load/web3.js'
 import Nbar from '../Nbar.js';
 import platform from '../Load/platform.js'
 import { create } from 'ipfs-http-client'
+import ReactLoading from 'react-loading';
 const ipfs = create('https://ipfs.infura.io:5001') // (the default in Node.js)
 
 //********加入合作案的介面***********
@@ -24,7 +25,8 @@ class JoinCooperation extends Component {
       }],
       EthNumber:0,
       cooperationJson:'',
-      memJson:''
+      memJson:'',
+      alarm:false
     }    
     this.handleCol = this.handleCol.bind(this);
     this.handleClick = this.handleClick.bind(this);
@@ -35,22 +37,25 @@ class JoinCooperation extends Component {
   //進入頁面前先進行初始化，設定使用者地址，並確認是否為管理者
   async componentWillMount() {
     const accounts = await web3.eth.getAccounts();
-    this.setState({ account: accounts[0] })
-    const pm = await platform.methods.manager().call();
+    if(accounts.length===0) this.setState({alarm:true})
+    else{
+      this.setState({ account: accounts[0] })
+      const pm = await platform.methods.manager().call();
 
-    if(this.state.account === pm){
-      this.setState({manager:true});
-    }
-    else
-      this.setState({manager:false});
+      if(this.state.account === pm){
+        this.setState({manager:true});
+      }
+      else
+        this.setState({manager:false});
 
-    this.setState({
-      cooperationJson:this.props.location.state.cooperationJson
-    })
+      this.setState({
+        cooperationJson:this.props.location.state.cooperationJson
+      })
 
-    if(await platform.methods.members(this.state.account).call()){
-      let memHash =await platform.methods.memberHash(this.state.account).call()
-      await this.getMemJson(memHash)
+      if(await platform.methods.members(this.state.account).call()){
+        let memHash =await platform.methods.memberHash(this.state.account).call()
+        await this.getMemJson(memHash)
+      }
     }
   }
 
@@ -63,6 +68,7 @@ class JoinCooperation extends Component {
         this.setState({
           memJson:importedJSON
         })
+        this.setState({isLoading:false})
       }
       else
         console.log('error')
@@ -106,6 +112,7 @@ class JoinCooperation extends Component {
 
   //送出確認
   async handleClick(e) {
+    this.setState({isLoading:true})
     //更新提案的資訊
     this.state.cooperationJson['memberDataset'].push([this.state.account,parseInt(await platform.methods.datasetCnt().call(),10)])
     
@@ -132,8 +139,8 @@ class JoinCooperation extends Component {
 
     platform.methods.updateCooperation(this.state.cooperationJson['ID'],ipfsCooperation['path']).send({from:this.state.account})
     platform.methods.createDataset(ipfsDataset['path']).send({ from: this.state.account })
-    platform.methods.updateMember(ifpsMem['path']).send({ from: this.state.account }).on('confirmation', (reciept) => {
-      window.location.reload()
+    platform.methods.updateMember(ifpsMem['path']).send({ from: this.state.account }).on('confirmation', async (reciept) => {
+      await this.getMemJson(ifpsMem['path'])
     })
   }
 
@@ -144,6 +151,7 @@ class JoinCooperation extends Component {
 
   //送出加密貨幣用來參與提案
   async handleSend(e){
+    this.setState({isLoading:true})
     this.state.cooperationJson['memberEth'].push([this.state.account,this.state.EthNumber])
 
     this.state.memJson['cooperations'].push(this.state.cooperationJson['ID'])
@@ -157,7 +165,9 @@ class JoinCooperation extends Component {
     let ifpsMem = await ipfs.add(Buffer.from(memJsonObj))
 
     platform.methods.updateCooperation(this.state.cooperationJson['ID'],ipfsCooperation['path']).send({from:this.state.account})
-    platform.methods.updateMember(ifpsMem['path']).send({ from: this.state.account })
+    platform.methods.updateMember(ifpsMem['path']).send({ from: this.state.account }).on('confirmation',async (reciept) => {
+      await this.getMemJson(ifpsMem['path'])
+    })
     platform.methods.addCooperationWithEth().send({ from: this.state.account,value:this.state.EthNumber});
   }
   //console顯示設定欄位，用來Debug
@@ -174,6 +184,10 @@ class JoinCooperation extends Component {
     const styleInput={
       border:'2px solid'
     };
+    if(this.state.alarm===true)
+      return <h3 style={{textAlign:'center'}}>You must log in metamask first</h3>
+    if(this.state.isLoading===true)
+    return <ReactLoading className='loader' type ={'bars'}/>
     return (
       <div>
         <Nbar account={this.state.account} manager={this.state.manager}memJson={this.state.memJson}/>

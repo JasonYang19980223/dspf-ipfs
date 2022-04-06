@@ -12,26 +12,31 @@ class HomePage extends Component {
     this.state = {
       account:'',
       //成員的Json file
-      memJson:''
-    }    
+      memJson:'',
+      alarm:false
+    } 
   }
 
   //進入頁面前先進行初始化，用來顯示使用者的地址及確定是否為管理者
   async componentWillMount() {
     const accounts = await web3.eth.getAccounts()
-    this.setState({ account: accounts[0] })
-    const pm = await platform.methods.manager().call();
-    if(this.state.account === pm){
-      console.log('hi')
-      this.setState({manager:true});
-    }
-    else
-      this.setState({manager:false});
-    
-    //若成員已註冊，從IPFS抓取其JSON資料
-    if(await platform.methods.members(this.state.account).call()){
-      let memHash =await platform.methods.memberHash(this.state.account).call()
-      await this.getMemJson(memHash)
+    console.log(accounts)
+    if(accounts.length===0) this.setState({alarm:true})
+    else{
+      this.setState({ account: accounts[0] })
+      const pm = await platform.methods.manager().call();
+      if(this.state.account === pm){
+        console.log('hi')
+        this.setState({manager:true});
+      }
+      else
+        this.setState({manager:false});
+      
+      //若成員已註冊，從IPFS抓取其JSON資料
+      if(await platform.methods.members(this.state.account).call()){
+        let memHash =await platform.methods.memberHash(this.state.account).call()
+        await this.getMemJson(memHash)
+      }
     }
   }
 
@@ -56,6 +61,8 @@ class HomePage extends Component {
       justifyContent: 'center',
       alignItems: 'center'
     };
+    if(this.state.alarm===true)
+      return <h3 style={{textAlign:'center'}}>You must log in metamask first</h3>
     return (
       <div className="Home">
         <Nbar account={this.state.account} manager ={this.state.manager} memJson={this.state.memJson}/>

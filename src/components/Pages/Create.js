@@ -3,6 +3,7 @@ import web3 from '../Load/web3.js';
 import platform from '../Load/platform.js'
 import { create } from 'ipfs-http-client'
 import Nbar from '../Nbar.js';
+import ReactLoading from 'react-loading';
 
 import '../CSS/Create.css'
 
@@ -28,7 +29,8 @@ class Create extends Component {
       orgnizationName:'',
       phone:'',
       email:'',
-      memJson:''
+      memJson:'',
+      alarm:false
     }
     this.handleName = this.handleName.bind(this);
     this.handlePhone = this.handlePhone.bind(this);
@@ -38,13 +40,16 @@ class Create extends Component {
   async componentWillMount() {
     // Load account
     const accounts = await web3.eth.getAccounts()
-    this.setState({ account: accounts[0] })
-    const pm = await platform.methods.manager().call();
-    if(this.state.account === pm){
-      this.setState({manager:true});
+    if(accounts.length===0) this.setState({alarm:true})
+    else{
+      this.setState({ account: accounts[0] })
+      const pm = await platform.methods.manager().call();
+      if(this.state.account === pm){
+        this.setState({manager:true});
+      }
+      else
+        this.setState({manager:false});
     }
-    else
-      this.setState({manager:false});
   }
   //設定組織名稱
   handleName(e) {
@@ -83,6 +88,8 @@ class Create extends Component {
     const styleInput={
       border:'2px solid'
     };
+    if(this.state.alarm===true)
+      return <h3 style={{textAlign:'center'}}>You must log in metamask first</h3>
     return (
       <div>
         <Nbar account={this.state.account} manager={this.state.manager}memJson={this.state.memJson}/> 

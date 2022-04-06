@@ -3,6 +3,7 @@ import web3 from '../Load/web3.js'
 import Nbar from '../Nbar.js';
 import platform from '../Load/platform.js'
 import { Link } from 'react-router-dom';
+import ReactLoading from 'react-loading';
 //********合作案資訊的介面***********
 class CooperationInform extends Component {
   
@@ -18,7 +19,8 @@ class CooperationInform extends Component {
       mems:[],
       memJson:'',
       ethmems:[],
-      isLoading:true
+      isLoading:true,
+      alarm:false
     }
     this.getInit= this.getInit.bind(this);
   }
@@ -28,23 +30,26 @@ class CooperationInform extends Component {
   async componentWillMount() {
     //讀取使用者的帳號
     const accounts = await web3.eth.getAccounts()
-    this.setState({ account: accounts[0] })
+    if(accounts.length===0) this.setState({alarm:true})
+    else{
+      this.setState({ account: accounts[0] })
 
-    //判斷是否為平台管理者
-    const pm = await platform.methods.manager().call();
-    if(this.state.account === pm){
-      this.setState({manager:true});
-    }
-    else
-      this.setState({manager:false});
-    
-    //獲取成員資訊
-    await this.getInit()
+      //判斷是否為平台管理者
+      const pm = await platform.methods.manager().call();
+      if(this.state.account === pm){
+        this.setState({manager:true});
+      }
+      else
+        this.setState({manager:false});
+      
+      //獲取成員資訊
+      await this.getInit()
 
-    //若成員已註冊，從IPFS抓取其JSON資料
-    if(await platform.methods.members(this.state.account).call()){
-      let memHash =await platform.methods.memberHash(this.state.account).call()
-      await this.getMemJson(memHash)
+      //若成員已註冊，從IPFS抓取其JSON資料
+      if(await platform.methods.members(this.state.account).call()){
+        let memHash =await platform.methods.memberHash(this.state.account).call()
+        await this.getMemJson(memHash)
+      }
     }
   }
 
@@ -126,8 +131,10 @@ class CooperationInform extends Component {
   }
 
   render() {
+    if(this.state.alarm===true)
+      return <h3 style={{textAlign:'center'}}>You must log in metamask first</h3>
     if(this.state.isLoading){
-      return <h3 style={{textAlign:'center'}}>Loading</h3>
+      return <ReactLoading className='loader' type ={'bars'}/>
     }
     return (
       <div>

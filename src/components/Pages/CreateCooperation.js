@@ -3,6 +3,7 @@ import web3 from '../Load/web3.js'
 import Nbar from '../Nbar.js';
 import platform from '../Load/platform.js'
 import { create } from 'ipfs-http-client'
+import ReactLoading from 'react-loading';
 const ipfs = create('https://ipfs.infura.io:5001') // (the default in Node.js)
 //ipfs api
 //const ipfs=create({host:'ipfs.infura.io',port:'5001',apiPath: '/api/v0'});
@@ -28,7 +29,9 @@ class CreateCooperation extends Component {
       target:'',
       openingPeriod:'',
       colNeed:0,
-      memJson:''
+      memJson:'',
+      alarm:false,
+      isLoading:false
     }    
     this.handleCol = this.handleCol.bind(this);
     this.handlePrimaryKey = this.handlePrimaryKey.bind(this);
@@ -45,18 +48,21 @@ class CreateCooperation extends Component {
   //進入頁面後，設定使用者地址，並確認是否為管理者
   async componentWillMount() {
     const accounts = await web3.eth.getAccounts();
-    this.setState({ account: accounts[0] })
-    const pm = await platform.methods.manager().call();
+    if(accounts.length===0) this.setState({alarm:true})
+    else{
+      this.setState({ account: accounts[0] })
+      const pm = await platform.methods.manager().call();
 
-    if(this.state.account === pm){
-      this.setState({manager:true});
-    }
-    else
-      this.setState({manager:false});
-    //若成員已註冊，從IPFS抓取其JSON資料
-    if(await platform.methods.members(this.state.account).call()){
-      let memHash =await platform.methods.memberHash(this.state.account).call()
-      await this.getMemJson(memHash)
+      if(this.state.account === pm){
+        this.setState({manager:true});
+      }
+      else
+        this.setState({manager:false});
+      //若成員已註冊，從IPFS抓取其JSON資料
+      if(await platform.methods.members(this.state.account).call()){
+        let memHash =await platform.methods.memberHash(this.state.account).call()
+        await this.getMemJson(memHash)
+      }
     }
   }
   
@@ -69,6 +75,8 @@ class CreateCooperation extends Component {
         this.setState({
           memJson:importedJSON
         })
+        this.setState({isLoading:false})
+        
       }
       else
         console.log('error')
@@ -140,6 +148,7 @@ class CreateCooperation extends Component {
 
   //送出確認
   async handleClick(e) {
+    this.setState({isLoading:true})
     //將成員地址和datasetID綁定
     let memberDatasets = [[this.state.account,parseInt(await platform.methods.datasetCnt().call(),10)]]
 
@@ -202,9 +211,10 @@ class CreateCooperation extends Component {
     platform.methods.createDataset(ipfsDataset['path']).send({ from: this.state.account })
 
     //更新區塊鏈上成員的ipfs hash
-    platform.methods.updateMember(ifpsMem['path']).send({ from: this.state.account }).on('confirmation', (reciept) => {
-      window.location.reload()
+    platform.methods.updateMember(ifpsMem['path']).send({ from: this.state.account }).on('confirmation', async (reciept) => {
+      await this.getMemJson(ifpsMem['path'])
     })
+    
   }
 
   //console顯示設定欄位，用來Debug
@@ -218,6 +228,10 @@ class CreateCooperation extends Component {
     const styleInput={
       border:'2px solid'
     };
+    if(this.state.alarm===true)
+      return <h3 style={{textAlign:'center'}}>You must log in metamask first</h3>
+    if(this.state.isLoading===true)
+      return <ReactLoading className='loader' type ={'bars'}/>
     return (
       <div >
         <Nbar account={this.state.account} manager={this.state.manager}memJson={this.state.memJson}/>
