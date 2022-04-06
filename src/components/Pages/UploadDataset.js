@@ -76,7 +76,9 @@ class UploadDataset extends Component {
         let cooperationJsonObj = JSON.stringify(this.state.cooperationJson);
         let ipfsCooperation = await ipfs.add(Buffer.from(cooperationJsonObj))
         //更新提案資訊
-        await platform.methods.updateCooperation(this.state.cooperationJson['ID'],ipfsCooperation['path']).send({from:this.state.account})
+        await platform.methods.updateCooperation(this.state.cooperationJson['ID'],ipfsCooperation['path']).send({from:this.state.account}).on('confirmation', (reciept) => {
+          window.location.reload()
+        })
     }
 
     //上傳加密過後的資料集

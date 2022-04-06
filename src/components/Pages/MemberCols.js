@@ -15,7 +15,8 @@ class RequestList extends Component {
     this.state = {
       account: '',
       cols:[],
-      memJson:''
+      memJson:'',
+      isLoading:true
     }
   }
 
@@ -57,7 +58,7 @@ class RequestList extends Component {
   async getInit(){
     //從合作案的JSON中獲得資料集的數量
     let datasetLen = this.props.location.state.cooperationJson['memberDataset'].length
-
+    if(datasetLen===0) return this.setState({isLoading:false})
     //從資料集中找出該成員提供的欄位
     for (let i = 0; i < datasetLen; i++){
       //資料集對應成員地址相符
@@ -81,6 +82,7 @@ class RequestList extends Component {
             cols: [...this.state.cols, datasetJSON['columns'][i]['name']]
           })
         }
+        this.setState({isLoading:false})
       }
       else
         console.log('error')
@@ -88,30 +90,35 @@ class RequestList extends Component {
   }
 
   render() {
-    return (
-      <div>
-        <Nbar account={this.state.account} manager ={this.state.manager}memJson={this.state.memJson}/>
-        <h3>Account: {this.state.account}</h3>
-        <br/>
-        <table className="table">
-          <thead>
-            <tr>
-              <th scope="col">Columns</th>
-            </tr>
-          </thead>
-          <tbody id="request">
-            { this.state.cols.map((col, key) => {
-              return(
-                <tr key={key}>
-                  <td>{col}</td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-        <br/>
-      </div>
-    );
+    if(this.state.isLoading){
+      return <h3 style={{textAlign:'center'}}>Loading</h3>
+    }
+    else{
+      return (
+        <div>
+          <Nbar account={this.state.account} manager ={this.state.manager}memJson={this.state.memJson}/>
+          <h3>Account: {this.state.account}</h3>
+          <br/>
+          <table className="table">
+            <thead>
+              <tr>
+                <th scope="col">Columns</th>
+              </tr>
+            </thead>
+            <tbody id="request">
+              { this.state.cols.map((col, key) => {
+                return(
+                  <tr key={key}>
+                    <td>{col}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+          <br/>
+        </div>
+      );
+    }
   }
 }
 

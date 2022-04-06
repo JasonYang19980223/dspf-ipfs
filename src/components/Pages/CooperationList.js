@@ -15,7 +15,8 @@ class CooperationList extends Component {
     this.state = {
       account: '',
       cooperations:[],
-      memJson:''
+      memJson:'',
+      isLoading:true
     }
     this.handleCooperation= this.handleCooperation.bind(this);
     this.handleJoin= this.handleJoin.bind(this);
@@ -61,22 +62,28 @@ class CooperationList extends Component {
     //call 智能合約中的cooperationCnt 來判斷當前合作案的數量
     let coolen=0;
     coolen = await platform.methods.cooperationCnt().call()
-    for (var i = 0; i < coolen; i++) {
+    console.log(parseInt(coolen))
+    if(parseInt(coolen) === 0) this.setState({isLoading:false})
+    for (var i = 0; i < parseInt(coolen); i++) {
       //call 智能合約中的getCooperation 來獲取該合作案
       let cooperation = await platform.methods.getCooperation(i).call()
-      await this.getCooJson(cooperation)
+      await this.getCooJson(cooperation,i,coolen)
     }
   }
 
   //由IPFS讀取合作案JSON
-  async getCooJson(ipfshash){
+  async getCooJson(ipfshash,i,coolen){
     let request = require('request');
+
     await request(`https://ipfs.io/ipfs/${ipfshash}`, function (error, response, body) {
       if (!error && response.statusCode === 200) {
         let importedJSON = JSON.parse(body);
         this.setState({
-          cooperations: [...this.state.cooperations, importedJSON]
+          cooperations: [...this.state.cooperations, [false,importedJSON]]
         })
+        if(i=== parseInt(coolen)-1){
+          this.setState({isLoading:false})
+        }
       }
       else
         console.log('error')
@@ -108,10 +115,14 @@ class CooperationList extends Component {
   }
 
   render() {
+    if(this.state.isLoading){
+      return <h3 style={{textAlign:'center'}}>Loading</h3>
+    }
     return (
       <div>
         <Nbar account={this.state.account} manager ={this.state.manager}memJson={this.state.memJson}/>
         <h3>Account: {this.state.account}</h3>
+        
         <br/>
         <table className="table">
           <thead>
@@ -129,28 +140,28 @@ class CooperationList extends Component {
               let join
               //判斷當前時間是否超過開放時間
               let now = new Date()
-              let period = new Date(cooperation['openPeriod'])
+              let period = new Date(cooperation[1]['openPeriod'])
               join=now>period?<td>close</td> :<td>
                       <Link to={{ 
                         pathname: "/JoinCooperation", 
-                        state:{ cooperationJson:cooperation}
+                        state:{ cooperationJson:cooperation[1]}
                         }}>
                         Join to share
                       </Link>
                     </td>
               return(
                 <tr key={key}>
-                  <th scope="row">{cooperation['ID']} </th>
+                  <th scope="row">{cooperation[1]['ID']} </th>
                   {now>period?<td>close</td>:<td>
                     <Link to={{ 
                     pathname: "/CooperationInform", 
-                    state:{ cooperationJson:cooperation}
+                    state:{ cooperationJson:cooperation[1]}
                     }}>
-                    {cooperation['target']}
+                    {cooperation[1]['target']}
                     </Link>
                   </td>}
-                  <td>{cooperation['host']}</td>
-                  <td>{cooperation['openPeriod']}</td>
+                  <td>{cooperation[1]['host']}</td>
+                  <td>{cooperation[1]['openPeriod']}</td>
                   {now>period?<td>false</td>:<td>true</td>}
                   {join}
                 </tr>

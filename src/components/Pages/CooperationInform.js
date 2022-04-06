@@ -17,7 +17,8 @@ class CooperationInform extends Component {
       account: '',
       mems:[],
       memJson:'',
-      ethmems:[]
+      ethmems:[],
+      isLoading:true
     }
     this.getInit= this.getInit.bind(this);
   }
@@ -69,22 +70,26 @@ class CooperationInform extends Component {
     let memsEthAddress=this.props.location.state.cooperationJson['memberEth']
     //參與的成員數
     let memLen = memsAddress.length
+    if(memLen===0) this.setState({isLoading:false})
     for (let i = 0; i < memLen; i++) {
+      this.setState({isLoading:true})
       //成員資訊的ipfs hash
       let memhash = await platform.methods.memberHash(memsAddress[i][0]).call()
-      await this.getMembersJson(memhash,memsAddress[i][0])
+      await this.getMembersJson(memhash,memsAddress[i][0],i,memLen)
     }
 
     let memEthLen = memsEthAddress.length
+    if(memEthLen===0) this.setState({isLoading:false})
     for (let j = 0; j < memEthLen; j++) {
+      this.setState({isLoading:true})
       //成員資訊的ipfs hash
       let memhash = await platform.methods.memberHash(memsEthAddress[j][0]).call()
-      await this.getEthMembersJson(memhash,memsEthAddress[j][0])
+      await this.getEthMembersJson(memhash,memsEthAddress[j][0],j,memEthLen)
     }
   }
 
   //由IPFS獲取有透過欄位參與合作案的成員
-  async getMembersJson(ipfshash,addr){
+  async getMembersJson(ipfshash,addr,i,memLen){
     let request = require('request');
     await request(`https://ipfs.io/ipfs/${ipfshash}`, function (error, response, body) {
       if (!error && response.statusCode === 200) {
@@ -92,6 +97,9 @@ class CooperationInform extends Component {
         this.setState({
           mems: [...this.state.mems, [memJSON['orgName'],memJSON['phone'],memJSON['email'],addr]]
         })
+        if(i=== parseInt(memLen)-1){
+          this.setState({isLoading:false})
+        }
       }
       else
         console.log('error')
@@ -99,7 +107,7 @@ class CooperationInform extends Component {
   }
 
   //由IPFS獲取有透過eth參與合作案的成員
-  async getEthMembersJson(ipfshash,addr){
+  async getEthMembersJson(ipfshash,addr,j,memEthLen){
     let request = require('request');
     await request(`https://ipfs.io/ipfs/${ipfshash}`, function (error, response, body) {
       if (!error && response.statusCode === 200) {
@@ -107,13 +115,20 @@ class CooperationInform extends Component {
         this.setState({
           ethmems: [...this.state.ethmems, [memJSON['orgName'],memJSON['phone'],memJSON['email'],addr]]
         })
+        if(j=== parseInt(memEthLen)-1){
+          this.setState({isLoading:false})
+        }
       }
+      
       else
         console.log('error')
     }.bind(this));
   }
 
   render() {
+    if(this.state.isLoading){
+      return <h3 style={{textAlign:'center'}}>Loading</h3>
+    }
     return (
       <div>
         <Nbar account={this.state.account} manager ={this.state.manager}memJson={this.state.memJson}/>

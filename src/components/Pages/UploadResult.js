@@ -159,7 +159,9 @@ class UploadResult extends Component {
       console.log(this.state.accs)
       console.log(this.state.totalAmount)
       console.log(ethAmount)
-      await platform.methods.distributePay(this.state.accs,ethAmount,this.state.totalAmount).send({ from: this.state.account })
+      await platform.methods.distributePay(this.state.accs,ethAmount,this.state.totalAmount).send({ from: this.state.account }).on('confirmation', (reciept) => {
+        window.location.reload()
+      })
     }
   
     //顯示輸入框和對應function

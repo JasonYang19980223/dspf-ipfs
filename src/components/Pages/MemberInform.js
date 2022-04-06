@@ -20,7 +20,8 @@ class MemberInform extends Component {
       phone:'',
       email:'',
       cooperations:[],
-      isLogIn:false
+      isLogIn:false,
+      isLoading:true
     }
     this.getInit= this.getInit.bind(this);
     this.getCooJson= this.getCooJson.bind(this);
@@ -30,7 +31,9 @@ class MemberInform extends Component {
   //call getInit() 來獲取該成員參與的合作案 
   async componentWillMount() {
     //判斷該組織是否已成為成員
-    await this.check()
+    const accounts = await web3.eth.getAccounts()
+    this.setState({ account: accounts[0] })
+    this.setState({isLogIn: await platform.methods.members(accounts[0]).call()})
 
     const pm = await platform.methods.manager().call();
     if(this.state.account === pm){
@@ -39,19 +42,14 @@ class MemberInform extends Component {
     else
       this.setState({manager:false});
 
-    if(this.state.isLogIn){}
+    if(this.state.isLogIn){
       await this.getInit()
-  }
+    }
 
-  //判斷該組織是否已成為成員
-  async check(){
-    const accounts = await web3.eth.getAccounts()
-    this.setState({ account: accounts[0] })
-    this.setState({isLogIn: await platform.methods.members(this.state.account).call()})
   }
 
   //由IPFS獲得參與的合作案資訊
-  async getCooJson(ipfshash){
+  async getCooJson(ipfshash,i,coolen){
     let request = require('request');
     
     await request(`https://ipfs.io/ipfs/${ipfshash}`, function (error, response, body) {
@@ -60,7 +58,9 @@ class MemberInform extends Component {
         this.setState({
           cooperations: [...this.state.cooperations,importedJSON]
         })
-        
+        if(i===coolen-1){
+          this.setState({isLoading:false})
+        }
       }
       else
         console.log('error')
@@ -71,10 +71,12 @@ class MemberInform extends Component {
   async getInit(){
     if(this.state.isLogIn){
       //獲取合作案
+
       let cooLen = this.props.location.state.memJson['cooperations'].length
+      if(cooLen === 0) return this.setState({isLoading:false})
       for(let i = 0;i<cooLen;i++){
         let cooHash = await platform.methods.getCooperation(this.props.location.state.memJson['cooperations'][i]).call()
-        await this.getCooJson(cooHash)
+        await this.getCooJson(cooHash,i,cooLen)
       }
     }
 
@@ -94,6 +96,9 @@ class MemberInform extends Component {
   }
 
   render() {
+    if(this.state.isLoading){
+      return <h3 style={{textAlign:'center'}}>Loading</h3>
+    }
     return (
       <div>
         <Nbar account={this.state.account} manager ={this.state.manager}memJson={ this.props.location.state.memJson}/>

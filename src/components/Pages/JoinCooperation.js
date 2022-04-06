@@ -107,14 +107,14 @@ class JoinCooperation extends Component {
   //送出確認
   async handleClick(e) {
     //更新提案的資訊
-    this.state.cooperationJson['memberDataset'].push([this.state.account,parseInt(await platform.methods.datasetCnt().call(),16)])
+    this.state.cooperationJson['memberDataset'].push([this.state.account,parseInt(await platform.methods.datasetCnt().call(),10)])
     
     //更新使用者的成員資訊
     this.state.memJson['cooperations'].push(this.state.cooperationJson['ID'])
     let newMemJson = this.state.memJson
 
     let datasetJson = {
-      "ID": parseInt(await platform.methods.datasetCnt().call(),16),
+      "ID": parseInt(await platform.methods.datasetCnt().call(),10),
       "cooID": this.state.cooperationJson['ID'],
       "ownerAddress": this.state.account,
       "columns":this.state.columns
@@ -132,7 +132,9 @@ class JoinCooperation extends Component {
 
     platform.methods.updateCooperation(this.state.cooperationJson['ID'],ipfsCooperation['path']).send({from:this.state.account})
     platform.methods.createDataset(ipfsDataset['path']).send({ from: this.state.account })
-    platform.methods.updateMember(ifpsMem['path']).send({ from: this.state.account })
+    platform.methods.updateMember(ifpsMem['path']).send({ from: this.state.account }).on('confirmation', (reciept) => {
+      window.location.reload()
+    })
   }
 
   //輸入要提供的加密貨幣

@@ -23,7 +23,8 @@ class CreatePage extends Component {
       phone:'',
       email:'',
       isLogIn:false,
-      memJson:''
+      memJson:'',
+      isLoading:true
     }    
   }
 
@@ -57,6 +58,7 @@ class CreatePage extends Component {
         this.setState({
           memJson:importedJSON
         })
+        this.setState({isLoading:false})
       }
       else
         console.log('error')
@@ -89,23 +91,28 @@ class CreatePage extends Component {
   render() {
     let page;
     //利用isLogIn變數來決定顯示的介面為何
-    if(this.state.isLogIn!==true){
-      //顯示Create.js
-      page=<Create/>;
+    if(this.state.isLoading&&this.state.isLogIn){
+      return <h3 style={{textAlign:'center'}}>Loading</h3>
     }
-    else{
-      page=(
-        <div>
-          <Nbar account={this.state.account} manager={this.state.manager}memJson={this.state.memJson}/>
-          <div stlye={{margin:"5px"}}>
-            <h1>You are already a member</h1>
-            <h2>Name:{this.state.name}</h2>
-            <h2>Phone:{this.state.phone}</h2>
-            <h2>Email:{this.state.email}</h2>
-            <h2>Address:{this.state.account}</h2>
+    else {
+      if(this.state.isLogIn!==true){
+        //顯示Create.js
+        page=<Create/>;
+      }
+      else{
+        page=(
+          <div>
+            <Nbar account={this.state.account} manager={this.state.manager}memJson={this.state.memJson}/>
+            <div stlye={{margin:"5px"}}>
+              <h1>You are already a member</h1>
+              <h2>Name:{this.state.name}</h2>
+              <h2>Phone:{this.state.phone}</h2>
+              <h2>Email:{this.state.email}</h2>
+              <h2>Address:{this.state.account}</h2>
+            </div>
           </div>
-        </div>
-      );
+        );
+      }
     }
     return(
       <div>

@@ -15,7 +15,8 @@ class ManageCooperation extends Component {
     this.state = {
       account: '',
       cooperations:[],
-      memJson:''
+      memJson:'',
+      isLoading:true
     }
     this.handleCooperation= this.handleCooperation.bind(this);
   }
@@ -60,15 +61,16 @@ class ManageCooperation extends Component {
     //call 智能合約中的cooperationCnt 來判斷當前合作案的數量
     let coolen=0;
     coolen = await platform.methods.cooperationCnt().call()
+    if(coolen ===0) this.setState({isLoading:false})
     for (var i = 0; i < coolen; i++) {
       //call 智能合約中的cooperations 來獲取該合作案
       let cooperation = await platform.methods.getCooperation(i).call()
-      await this.getCooJson(cooperation)
+      await this.getCooJson(cooperation,i,coolen)
     }
   }
 
   //由IPFS讀取合作案JSON
-  async getCooJson(ipfshash){
+  async getCooJson(ipfshash,i,coolen){
     let request = require('request');
     await request(`https://ipfs.io/ipfs/${ipfshash}`, function (error, response, body) {
       if (!error && response.statusCode === 200) {
@@ -76,6 +78,9 @@ class ManageCooperation extends Component {
         this.setState({
           cooperations: [...this.state.cooperations, importedJSON]
         })
+        if(i=== parseInt(coolen)-1){
+          this.setState({isLoading:false})
+        }
       }
       else
         console.log('error')
@@ -95,6 +100,9 @@ class ManageCooperation extends Component {
   }
 
   render() {
+    if(this.state.isLoading){
+      return <h3 style={{textAlign:'center'}}>Loading</h3>
+    }
     return (
       <div>
         <Nbar account={this.state.account} manager ={this.state.manager}memJson={this.state.memJson}/>

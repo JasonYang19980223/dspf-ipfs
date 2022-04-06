@@ -141,7 +141,7 @@ class CreateCooperation extends Component {
   //送出確認
   async handleClick(e) {
     //將成員地址和datasetID綁定
-    let memberDatasets = [[this.state.account,parseInt(await platform.methods.datasetCnt().call(),16)]]
+    let memberDatasets = [[this.state.account,parseInt(await platform.methods.datasetCnt().call(),10)]]
 
     //把天數加上當下日期
     function addDays(date, days) {
@@ -154,7 +154,7 @@ class CreateCooperation extends Component {
 
     //新建合作案資訊的JSON
     let cooperationJson = {
-      "ID": parseInt(await platform.methods.cooperationCnt().call(),16),
+      "ID": parseInt(await platform.methods.cooperationCnt().call(),10),
       "target": this.state.target,
       "host": this.state.account,
       "memberDataset":memberDatasets,
@@ -176,8 +176,8 @@ class CreateCooperation extends Component {
 
     //成員提供合作案的欄位資訊包成JSON
     let datasetJson = {
-      "ID": parseInt(await platform.methods.datasetCnt().call(),16),
-      "cooID": parseInt(await platform.methods.cooperationCnt().call(),16),
+      "ID": parseInt(await platform.methods.datasetCnt().call(),10),
+      "cooID": parseInt(await platform.methods.cooperationCnt().call(),10),
       "ownerAddress": this.state.account,
       "columns":this.state.columns
     }
@@ -202,12 +202,14 @@ class CreateCooperation extends Component {
     platform.methods.createDataset(ipfsDataset['path']).send({ from: this.state.account })
 
     //更新區塊鏈上成員的ipfs hash
-    platform.methods.updateMember(ifpsMem['path']).send({ from: this.state.account })
+    platform.methods.updateMember(ifpsMem['path']).send({ from: this.state.account }).on('confirmation', (reciept) => {
+      window.location.reload()
+    })
   }
 
   //console顯示設定欄位，用來Debug
   async show(){
-    let contractBalance = parseInt(await platform.methods.getContractBalance().call(),16);
+    let contractBalance = parseInt(await platform.methods.getContractBalance().call(),10);
     console.log(contractBalance)
   }
 

@@ -14,6 +14,9 @@ async function loadWeb3(){
     else {
       window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!')
     }
+    window.ethereum.on('accountsChanged', function (accounts) {
+      window.location.replace('/')
+    });
 }
 (async () => {
   await loadWeb3()

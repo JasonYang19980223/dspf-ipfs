@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import web3 from '../Load/web3.js';
-import contract from '../Load/platform.js'
+import platform from '../Load/platform.js'
 import { create } from 'ipfs-http-client'
 import Nbar from '../Nbar.js';
 
@@ -39,8 +39,7 @@ class Create extends Component {
     // Load account
     const accounts = await web3.eth.getAccounts()
     this.setState({ account: accounts[0] })
-    this.setState({ contract })
-    const pm = await contract.methods.manager().call();
+    const pm = await platform.methods.manager().call();
     if(this.state.account === pm){
       this.setState({manager:true});
     }
@@ -63,6 +62,7 @@ class Create extends Component {
   }
   //將成員資訊上傳IPFS
   async handleClick(e) {
+    
     let orgJson = {
       "orgName": this.state.orgnizationName,
       "phone": this.state.phone,
@@ -73,7 +73,10 @@ class Create extends Component {
     console.log("Submitting file to ipfs...")
     let cid = await ipfs.add(Buffer.from(jsonObj))
     console.log(cid['path'])
-    await contract.methods.register(cid['path']).send({ from: this.state.account })
+    await platform.methods.register(cid['path']).send({ from: this.state.account }).on('confirmation', (reciept) => {
+      window.location.reload()
+    })
+    console.log('hi')
   }
   
   render() {
