@@ -47,7 +47,7 @@ class CreatePage extends Component {
       await this.check()
 
       //若成員已註冊，從IPFS抓取其JSON資料
-      if(await platform.methods.members(this.state.account).call()){
+      if(await platform.methods.members(this.state.account).call()||await platform.methods.watingVerified(this.state.account).call()){
         let memHash =await platform.methods.memberHash(this.state.account).call()
         await this.getMemJson(memHash)
       }
@@ -73,7 +73,9 @@ class CreatePage extends Component {
   //呼叫合約中的members這個mapping來判定該組織是否已成為成員
   async check(){
     let log =await platform.methods.members(this.state.account).call()
+    let waitingStatus =await platform.methods.watingVerified(this.state.account).call()
     this.setState({isLogIn:log})
+    this.setState({waitinglog:waitingStatus})
     //若已成為成員，頁面顯示成員的基本資料
     if(this.state.isLogIn){
       let request = require('request');
@@ -102,11 +104,16 @@ class CreatePage extends Component {
       return <ReactLoading className='loader' type ={'bars'}/>
     }
     else {
-      if(this.state.isLogIn!==true){
+      if(this.state.isLogIn!==true&&this.state.waitinglog!==true){
         //顯示Create.js
         page=<Create/>;
       }
-      else{
+      else if(this.state.isLogIn!==true&&this.state.waitinglog){
+        page=(<div stlye={{margin:"5px"}}>
+                <Nbar account={this.state.account} manager={this.state.manager}memJson={this.state.memJson}/>
+                <h1>wating for verification</h1>
+              </div>)}
+      else if(this.state.isLogIn==true&&!this.state.waitinglog){
         page=(
           <div>
             <Nbar account={this.state.account} manager={this.state.manager}memJson={this.state.memJson}/>

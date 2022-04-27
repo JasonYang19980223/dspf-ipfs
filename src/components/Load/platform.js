@@ -6,7 +6,7 @@ import Platform from '../../abis/DSPF.json';
 //params(合約abi,合約地址)
 const platform =new Web3.eth.Contract(
     Platform.abi,
-    '0x6C78047c6C7166d7296D180eA53075E84792281b'
+    '0x0258Fe1f1E80d382189968246ff7fe6981ab8909'
 );
 
 export default platform;

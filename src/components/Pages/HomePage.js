@@ -33,7 +33,7 @@ class HomePage extends Component {
         this.setState({manager:false});
       
       //若成員已註冊，從IPFS抓取其JSON資料
-      if(await platform.methods.members(this.state.account).call()){
+      if(await platform.methods.members(this.state.account).call()||await platform.methods.watingVerified(this.state.account).call()){
         let memHash =await platform.methods.memberHash(this.state.account).call()
         await this.getMemJson(memHash)
       }

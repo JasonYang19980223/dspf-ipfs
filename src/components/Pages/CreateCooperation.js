@@ -31,7 +31,8 @@ class CreateCooperation extends Component {
       colNeed:0,
       memJson:'',
       alarm:false,
-      isLoading:false
+      isLoading:false,
+      description:''
     }    
     this.handleCol = this.handleCol.bind(this);
     this.handlePrimaryKey = this.handlePrimaryKey.bind(this);
@@ -40,6 +41,7 @@ class CreateCooperation extends Component {
     this.handleOpeningPreiod = this.handleOpeningPreiod.bind(this);
     this.handleTarget = this.handleTarget.bind(this);
     this.handleColNeed = this.handleColNeed.bind(this);
+    this.handledescription = this.handledescription.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.show = this.show.bind(this);
   }
@@ -59,7 +61,7 @@ class CreateCooperation extends Component {
       else
         this.setState({manager:false});
       //若成員已註冊，從IPFS抓取其JSON資料
-      if(await platform.methods.members(this.state.account).call()){
+      if(await platform.methods.members(this.state.account).call()||await platform.methods.watingVerified(this.state.account).call()){
         let memHash =await platform.methods.memberHash(this.state.account).call()
         await this.getMemJson(memHash)
       }
@@ -125,7 +127,13 @@ class CreateCooperation extends Component {
   //設定參加提案eth需求數量
   handlejoinEthNeed(e) {
     this.setState({joinEthNeed:e.target.value});
-  }    
+  }   
+  
+  //設定提案的描述
+  handledescription(e) {
+    this.setState({description:e.target.value});
+  }  
+
   //新增欄位
   addCol(){
     this.setState(prevState=>({
@@ -165,6 +173,7 @@ class CreateCooperation extends Component {
     let cooperationJson = {
       "ID": parseInt(await platform.methods.cooperationCnt().call(),10),
       "target": this.state.target,
+      "detail":this.state.description,
       "host": this.state.account,
       "memberDataset":memberDatasets,
       "memberEth":[],
@@ -257,7 +266,7 @@ class CreateCooperation extends Component {
                <input type="text" placeholder="column need" style={styleInput} onChange={ this.handleColNeed } />
               </label>
               <label style={{display: 'block',textAlign:'center'}}>
-                <textarea rows="4" cols="50" type="text" placeholder="description" style={styleInput} />
+                <textarea rows="4" cols="50" type="text" placeholder="description" style={styleInput} onChange={ this.handledescription }/>
               </label>
           </div>    
           <div>

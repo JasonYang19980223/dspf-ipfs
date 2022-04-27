@@ -5,6 +5,8 @@ contract DSPF {
   //平台管理者帳號
   address public manager;
   mapping (address => bool) public members;
+  mapping (uint => address) public idtoWait;
+  mapping (address => bool) public watingVerified;
 
   mapping (address => string) public memberHash;
   mapping (uint => string) public cooperationHash;
@@ -20,7 +22,9 @@ contract DSPF {
       require(members[msg.sender]==true);
       _;
   }
-
+  //等待驗證的成員總數
+  uint public waitingMemsCnt =0;
+  
   //計算資料申請的總數，當作資料要求的ID
   uint public datasetCnt =0;
   
@@ -28,9 +32,16 @@ contract DSPF {
   uint public cooperationCnt =0;
 
   //註冊平台成員
-  function register(string memory _memHash) public {
-    members[msg.sender]=true;
+  function registerVerified(address addr) public {
+    watingVerified[addr]=false;
+    members[addr]=true;
+  }
+  //註冊等待驗證
+  function waitingVerified(string memory _memHash) public {
+    idtoWait[waitingMemsCnt]=msg.sender;
+    watingVerified[msg.sender]=true;
     memberHash[msg.sender]=_memHash;
+    waitingMemsCnt++;
   }
 
   //取得IPFS平台成員資訊

@@ -34,19 +34,22 @@ class MemberInform extends Component {
   async componentWillMount() {
     //判斷該組織是否已成為成員
     const accounts = await web3.eth.getAccounts()
+
     if(accounts.length===0) this.setState({alarm:true})
     else{
       this.setState({ account: accounts[0] })
       this.setState({isLogIn: await platform.methods.members(accounts[0]).call()})
-
+      this.setState({waitinglog:await platform.methods.watingVerified(accounts[0]).call()})
       const pm = await platform.methods.manager().call();
       if(this.state.account === pm){
         this.setState({manager:true});
       }
       else
         this.setState({manager:false});
-
-      if(this.state.isLogIn){
+      console.log(this.state.isLogIn)
+      console.log(this.state.waitinglog)
+      if(this.state.isLogIn||this.state.waitinglog){
+        console.log('hi')
         await this.getInit()
       }
     }
@@ -74,7 +77,7 @@ class MemberInform extends Component {
 
   //獲取該成員參與的合作案
   async getInit(){
-    if(this.state.isLogIn){
+    if(this.state.isLogIn||this.state.waitinglog){
       //獲取合作案
       console.log(this.props.location.state.memJson)
       if(this.props.location.state.memJson!==''){

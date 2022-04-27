@@ -3,7 +3,6 @@ import web3 from '../Load/web3.js';
 import platform from '../Load/platform.js'
 import { create } from 'ipfs-http-client'
 import Nbar from '../Nbar.js';
-import ReactLoading from 'react-loading';
 
 import '../CSS/Create.css'
 
@@ -78,10 +77,9 @@ class Create extends Component {
     console.log("Submitting file to ipfs...")
     let cid = await ipfs.add(Buffer.from(jsonObj))
     console.log(cid['path'])
-    await platform.methods.register(cid['path']).send({ from: this.state.account }).on('confirmation', (reciept) => {
+    await platform.methods.waitingVerified(cid['path']).send({ from: this.state.account }).on('confirmation', (reciept) => {
       window.location.reload()
     })
-    console.log('hi')
   }
   
   render() {
