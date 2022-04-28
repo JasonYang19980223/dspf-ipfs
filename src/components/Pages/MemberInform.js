@@ -49,7 +49,6 @@ class MemberInform extends Component {
       console.log(this.state.isLogIn)
       console.log(this.state.waitinglog)
       if(this.state.isLogIn||this.state.waitinglog){
-        console.log('hi')
         await this.getInit()
       }
     }
@@ -116,7 +115,7 @@ class MemberInform extends Component {
         <Nbar account={this.state.account} manager ={this.state.manager}memJson={ this.props.location.state.memJson}/>
         <h3>Account: {this.state.account}</h3>
         <br/>
-        <h3>Name: {this.state.name}</h3>
+        <h3>Name: { this.props.location.state.memJson['orgName']}</h3>
         <br/>
         <table className="table">
           <thead>

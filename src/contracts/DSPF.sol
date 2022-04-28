@@ -9,8 +9,11 @@ contract DSPF {
   mapping (address => bool) public watingVerified;
 
   mapping (address => string) public memberHash;
+
+  mapping (uint => bool) public cooWaitingVerified;
   mapping (uint => string) public cooperationHash;
   mapping (uint => string) public datasetHash;
+
 
   //初始化平台管理者地址
   constructor(){
@@ -29,7 +32,9 @@ contract DSPF {
   uint public datasetCnt =0;
   
   //計算資料申請的總數，當作資料要求的ID
+  uint public cooWaitingCnt =0;
   uint public cooperationCnt =0;
+
 
   //註冊平台成員
   function registerVerified(address addr) public {
@@ -60,7 +65,14 @@ contract DSPF {
   //創建提案
   function createCooperation(string memory _cooperationHash) public memberOnly{
     cooperationHash[cooperationCnt] = _cooperationHash;
+    cooWaitingVerified[cooWaitingCnt]=true;
+    cooWaitingCnt++;
     cooperationCnt++;
+  }
+
+  //審核提案
+  function verifyCooperation(uint _cooperationID) public memberOnly{
+    cooWaitingVerified[_cooperationID]=false;
   }
 
   //更新提案IPFS的hash

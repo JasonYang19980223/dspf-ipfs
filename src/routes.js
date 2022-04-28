@@ -13,7 +13,7 @@ import UploadDataset from "./components/Pages/UploadDataset";
 import UploadResult from "./components/Pages/UploadResult";
 import DownloadFile from "./components/Pages/DownloadFile";
 import MemVerify from "./components/Pages/MemVerify";
-
+import CooperationVerify from "./components/Pages/CooperationVerify";
 
 import history from './History';
 
@@ -34,6 +34,7 @@ export default class Routes extends Component {
                     <Route path="/UploadResult" component={UploadResult} />
                     <Route path="/DownloadFile" component={DownloadFile} />
                     <Route path="/MemVerify"  exact component={MemVerify} />
+                    <Route path="/CooperationVerify"  exact component={CooperationVerify} />
                     <Route path="/" exact component={HomePage} />
                 </Switch>
             </BrowserRouter>

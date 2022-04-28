@@ -5,9 +5,7 @@ import platform from '../Load/platform.js'
 import history from '../../History';
 import { Link } from 'react-router-dom';
 import ReactLoading from 'react-loading';
-//********合作案列表的介面***********
-class CooperationList extends Component {
-  
+class CooperationVerify extends Component {
   //account 使用者的地址
   //cooperations 合作案的list
   //memJson 用來傳遞當前登入成員資訊的Json
@@ -21,7 +19,7 @@ class CooperationList extends Component {
       alarm:false
     }
     this.handleCooperation= this.handleCooperation.bind(this);
-    this.handleJoin= this.handleJoin.bind(this);
+    this.handleClick= this.handleClick.bind(this);
   }
 
   //進入頁面前先進行初始化，設定使用者地址，並確認是否為管理者 
@@ -66,12 +64,12 @@ class CooperationList extends Component {
   async getInit(){
     //call 智能合約中的cooperationCnt 來判斷當前合作案的數量
     let coolen=0;
-    coolen = await platform.methods.cooperationCnt().call()
+    coolen = await platform.methods.cooWaitingCnt().call()
     console.log(parseInt(coolen))
     if(parseInt(coolen) === 0) this.setState({isLoading:false})
     for (var i = 0; i < parseInt(coolen); i++) {
       //call 智能合約中的getCooperation 來獲取該合作案
-      if(!await platform.methods.cooWaitingVerified(i).call()){
+      if(await platform.methods.cooWaitingVerified(i).call()){
         let cooperation = await platform.methods.getCooperation(i).call()
         await this.getCooJson(cooperation,i,coolen)
       }
@@ -114,14 +112,10 @@ class CooperationList extends Component {
 
   //點選button: join to share 跳轉到joinCooperation的介面
   //param: 合作案的ID  
-  async handleJoin(cooID) {
-    let path = "/JoinCooperation"; 
-    history.push({
-      pathname:path,
-      state:{
-        cooperationID:cooID
-      }
-    });
+  async handleClick(cooID) {
+    await platform.methods.verifyCooperation(cooID).send({ from: this.state.account }).on('confirmation', (reciept) => {
+        window.location.reload()
+    })
   }
 
   render() {
@@ -144,38 +138,36 @@ class CooperationList extends Component {
               <th scope="col">Host</th>
               <th scope="col">Period</th>
               <th scope="col">Open</th>
-              <th scope="col">Join</th>
+              <th scope="col">verify</th>
             </tr>
           </thead>
           <tbody id="request">
             { this.state.cooperations.map((cooperation, key) => {
-              let join
               //判斷當前時間是否超過開放時間
               let now = new Date()
               let period = new Date(cooperation[1]['openPeriod'])
-              join=now>period?<td>close</td> :<td>
-                      <Link to={{ 
-                        pathname: "/JoinCooperation", 
-                        state:{ cooperationJson:cooperation[1]}
-                        }}>
-                        Join to share
-                      </Link>
-                    </td>
               return(
                 <tr key={key}>
-                  <th scope="row">{cooperation[1]['ID']} </th>
-                  {now>period?<td>close</td>:<td>
-                    <Link to={{ 
-                    pathname: "/CooperationInform", 
-                    state:{ cooperationJson:cooperation[1]}
-                    }}>
-                    {cooperation[1]['target']}
-                    </Link>
-                  </td>}
-                  <td>{cooperation[1]['host']}</td>
-                  <td>{cooperation[1]['openPeriod']}</td>
-                  {now>period?<td>false</td>:<td>true</td>}
-                  {join}
+                    <th scope="row">{cooperation[1]['ID']} </th>
+                    {now>period?<td>close</td>:<td>
+                        <Link to={{ 
+                        pathname: "/CooperationInform", 
+                        state:{ cooperationJson:cooperation[1]}
+                        }}>
+                        {cooperation[1]['target']}
+                        </Link>
+                    </td>}
+                    <td>{cooperation[1]['host']}</td>
+                    <td>{cooperation[1]['openPeriod']}</td>
+                    {now>period?<td>false</td>:<td>true</td>}
+                    <td>
+                        <input
+                            type="button"
+                            value="verify coo"
+                            style={{cursor:'pointer'}}
+                            onClick={() => this.handleClick(cooperation[1]['ID'])}
+                        />
+                    </td>
                 </tr>
               )
             })}
@@ -187,5 +179,4 @@ class CooperationList extends Component {
   }
 }
 
-
-export default CooperationList;
+export default CooperationVerify;

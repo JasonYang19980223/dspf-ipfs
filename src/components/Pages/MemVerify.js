@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import web3 from '../Load/web3.js'
 import Nbar from '../Nbar.js';
 import platform from '../Load/platform.js'
-import { Link } from 'react-router-dom';
-import { create } from 'ipfs-http-client'
 import ReactLoading from 'react-loading';
 
 class MemVerify extends Component {
@@ -55,7 +53,22 @@ class MemVerify extends Component {
           }
         }
     }
-
+    async getMemJson(ipfshash){
+        let request = require('request');
+        await request(`https://ipfs.io/ipfs/${ipfshash}`, function (error, response, body) {
+          if (!error && response.statusCode === 200) {
+            let importedJSON = JSON.parse(body);
+            this.setState({
+              memJson:importedJSON
+            })
+            this.setState({isLoading:false})
+            
+          }
+          else
+            console.log('error')
+        }.bind(this));
+      }
+      
     //由IPFS獲取有透過欄位參與合作案的成員
     async getMembersJson(ipfshash,addr,i,waitingMem){
         let request = require('request');

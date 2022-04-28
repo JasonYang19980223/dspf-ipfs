@@ -113,7 +113,7 @@ class CreatePage extends Component {
                 <Nbar account={this.state.account} manager={this.state.manager}memJson={this.state.memJson}/>
                 <h1>wating for verification</h1>
               </div>)}
-      else if(this.state.isLogIn==true&&!this.state.waitinglog){
+      else if(this.state.isLogIn===true&&!this.state.waitinglog){
         page=(
           <div>
             <Nbar account={this.state.account} manager={this.state.manager}memJson={this.state.memJson}/>

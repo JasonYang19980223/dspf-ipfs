@@ -17,7 +17,8 @@ export default function Nbar (props) {
               <NavLink to={{pathname:"/MemberInform",state:{ memJson:props.memJson}}}   activeStyle={{color:"blue"}} style={{color:"black",margin:"5px"}}  >Member information</NavLink>
               <NavLink to="/CooperationList"   activeStyle={{color:"blue"}} style={{color:"black",margin:"5px"}}>Cooperation list</NavLink>
               {props.manager&&<NavLink to="/ManageCooperation"  activeStyle={{color:"blue"}} style={{color:"black",margin:"5px"}}>Pending list</NavLink>}
-              {props.manager&&<NavLink to="/MemVerify"  activeStyle={{color:"blue"}} style={{color:"black",margin:"5px"}}>Verification </NavLink>}
+              {props.manager&&<NavLink to="/MemVerify"  activeStyle={{color:"blue"}} style={{color:"black",margin:"5px"}}>Mem Verification </NavLink>}
+              {props.manager&&<NavLink to="/CooperationVerify"  activeStyle={{color:"blue"}} style={{color:"black",margin:"5px"}}>Coo Verification </NavLink>}
             </Nav>
               <ul className="navbar-nav px-3">
                 <li className="nav-item text-nowrap d-none d-sm-none d-sm-block">

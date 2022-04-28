@@ -68,9 +68,13 @@ class ManageCooperation extends Component {
     coolen = await platform.methods.cooperationCnt().call()
     if(coolen ===0) this.setState({isLoading:false})
     for (var i = 0; i < coolen; i++) {
-      //call 智能合約中的cooperations 來獲取該合作案
-      let cooperation = await platform.methods.getCooperation(i).call()
-      await this.getCooJson(cooperation,i,coolen)
+      if(!await platform.methods.cooWaitingVerified(i).call()){
+        let cooperation = await platform.methods.getCooperation(i).call()
+        await this.getCooJson(cooperation,i,coolen)
+      }
+      else if(i===coolen-1){
+        this.setState({isLoading:false});
+      }
     }
   }
 
