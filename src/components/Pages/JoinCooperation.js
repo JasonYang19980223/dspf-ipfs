@@ -114,10 +114,10 @@ class JoinCooperation extends Component {
   async handleClick(e) {
     this.setState({isLoading:true})
     //更新提案的資訊
-    this.state.cooperationJson['memberDataset'].push([this.state.account,parseInt(await platform.methods.datasetCnt().call(),10)])
+    this.state.cooperationJson['unVerifiedMenData'].push([this.state.account,parseInt(await platform.methods.datasetCnt().call(),10)])
     
     //更新使用者的成員資訊
-    this.state.memJson['cooperations'].push(this.state.cooperationJson['ID'])
+    this.state.memJson['unverifiedCooperations'].push(this.state.cooperationJson['ID'])
     let newMemJson = this.state.memJson
 
     let datasetJson = {
@@ -152,9 +152,9 @@ class JoinCooperation extends Component {
   //送出加密貨幣用來參與提案
   async handleSend(e){
     this.setState({isLoading:true})
-    this.state.cooperationJson['memberEth'].push([this.state.account,this.state.EthNumber])
+    this.state.cooperationJson['unVerifiedMemEth'].push([this.state.account,this.state.EthNumber])
 
-    this.state.memJson['cooperations'].push(this.state.cooperationJson['ID'])
+    this.state.memJson['unverifiedCooperations'].push(this.state.cooperationJson['ID'])
     let newMemJson = this.state.memJson
 
     let memJsonObj =JSON.stringify(newMemJson);

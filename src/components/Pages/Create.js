@@ -71,7 +71,8 @@ class Create extends Component {
       "orgName": this.state.orgnizationName,
       "phone": this.state.phone,
       "email": this.state.email,
-      "cooperations":[]
+      "cooperations":[],
+      "unverifiedCooperations":[]
     };
     let jsonObj = JSON.stringify(orgJson);
     console.log("Submitting file to ipfs...")

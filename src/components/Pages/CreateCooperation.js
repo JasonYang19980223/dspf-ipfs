@@ -175,6 +175,8 @@ class CreateCooperation extends Component {
       "target": this.state.target,
       "detail":this.state.description,
       "host": this.state.account,
+      "unVerifiedMenData":[],
+      "unVerifiedMemEth":[],
       "memberDataset":memberDatasets,
       "memberEth":[],
       "alreadyUpload":[],

@@ -62,6 +62,12 @@ contract DSPF {
     memberHash[msg.sender]=_memHash;
   }
 
+  //更新平台成員資訊
+  function joinUpdateMember(address _addr,string memory _memHash) public {
+    memberHash[_addr]=_memHash;
+  }
+
+
   //創建提案
   function createCooperation(string memory _cooperationHash) public memberOnly{
     cooperationHash[cooperationCnt] = _cooperationHash;

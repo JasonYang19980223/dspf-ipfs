@@ -14,6 +14,9 @@ import UploadResult from "./components/Pages/UploadResult";
 import DownloadFile from "./components/Pages/DownloadFile";
 import MemVerify from "./components/Pages/MemVerify";
 import CooperationVerify from "./components/Pages/CooperationVerify";
+import JoinVerify from "./components/Pages/JoinVerify";
+import WaitForJoin from "./components/Pages/WaitForJoin";
+import VerifiedMemberCols from "./components/Pages/VerifiedMemberCols";
 
 import history from './History';
 
@@ -35,6 +38,9 @@ export default class Routes extends Component {
                     <Route path="/DownloadFile" component={DownloadFile} />
                     <Route path="/MemVerify"  exact component={MemVerify} />
                     <Route path="/CooperationVerify"  exact component={CooperationVerify} />
+                    <Route path="/JoinVerify"  exact component={JoinVerify} />
+                    <Route path="/WaitForJoin"  exact component={WaitForJoin} />
+                    <Route path="/VerifiedMemberCols"  exact component={VerifiedMemberCols} />
                     <Route path="/" exact component={HomePage} />
                 </Switch>
             </BrowserRouter>

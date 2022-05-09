@@ -16,6 +16,7 @@ export default function Nbar (props) {
               <NavLink to="/CreateCooperation"   activeStyle={{color:"blue"}} style={{color:"black",margin:"5px"}}>Create Cooperation</NavLink>
               <NavLink to={{pathname:"/MemberInform",state:{ memJson:props.memJson}}}   activeStyle={{color:"blue"}} style={{color:"black",margin:"5px"}}  >Member information</NavLink>
               <NavLink to="/CooperationList"   activeStyle={{color:"blue"}} style={{color:"black",margin:"5px"}}>Cooperation list</NavLink>
+              <NavLink to={{pathname:"/JoinVerify",state:{ memJson:props.memJson}}}   activeStyle={{color:"blue"}} style={{color:"black",margin:"5px"}}>Join verify</NavLink>
               {props.manager&&<NavLink to="/ManageCooperation"  activeStyle={{color:"blue"}} style={{color:"black",margin:"5px"}}>Pending list</NavLink>}
               {props.manager&&<NavLink to="/MemVerify"  activeStyle={{color:"blue"}} style={{color:"black",margin:"5px"}}>Mem Verification </NavLink>}
               {props.manager&&<NavLink to="/CooperationVerify"  activeStyle={{color:"blue"}} style={{color:"black",margin:"5px"}}>Coo Verification </NavLink>}
